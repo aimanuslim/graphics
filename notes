@@ -1,0 +1,15 @@
+Procedure for Island generation:
+
+1. Generate random points
+	Parameters:
+	a. number of points
+	b. distribution: Grid, randomize, spiral
+	c. LLoyd relaxation: apply or not
+2. Generate voronoi polygons
+3. Hill points generation
+	a. Select points
+	b. intensity of darkness of area (darkness == elevation value) decrease linearly and radially from the center of the points
+	c. Equation: (x-a)^2 + (y-b)^2 = r where  r = distance from center, (a,b) is the center coordinate of the circle
+4. Devise algorithm to detect areas of potential lakes.
+5. User input for starting point rivers
+	a. using the elevation values and the edges of the polygons, calculate the highest slope gradient downwards for where the rivers will flow into.	
