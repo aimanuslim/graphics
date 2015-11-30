@@ -1,0 +1,23 @@
+---Grammar File for a Fractal Tree
+
+Meta Information
+angle 30
+iterations 1
+diameter_ratio 0.8
+alpha 13
+contraction_ratio 0.707
+
+Alphabets
+F,L,T,I,B
+
+Starting Symbol
+F
+
+Production Rules
+F -> FF[F+F[F[L][-L]]+F[++L]][FFF[+L][L][-L]]-F-FF[L][-L]
+L -> LL
+
+
+
+ 
+
