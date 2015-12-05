@@ -27,6 +27,12 @@ void glutCallBacks::mouseHandler(int, int, int, int)
 
 }
 
+void glutCallBacks::specialFunc(int key, int x, int y)
+{
+	glutCallBacks::renderer->special(key, x, y);
+}
+
+
 glutCallBacks::~glutCallBacks()
 {
 }

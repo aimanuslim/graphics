@@ -10,21 +10,38 @@
 
 int main(int argc, char **argv)
 {
+
+	/**********************Data Input from Island Map**************/
+	/*float elevation[WINDOW_H][WINDOW_W];
+	float tree_count;
+	float colors[WINDOW_H][WINDOW_W], surface_normals[WINDOW_H][WINDOW_W];
+	*/
 	//Test parser
 	grammar_parser * parser(new grammar_parser(std::string("test_grammar.txt")));
 	parser->parseFile();
 
+	//Test string generator
+	tree_generator generator(parser);
+	tuple3d base_location = tuple3d(0.0, -10.0, -5.0f);
+	
+	/*for (tuple3d base_loc : surface_normals)
+	{
+
+	}*/
+	generator.setTreeBaseLocation(base_location);
+	//generator.generateTree(parser->model_data->find(std::string("iterations"))->second));
+	_sleep(10000);
+
 	//Instantiate Renderer
-	tree_renderer * rend_obj(new tree_renderer());
+	tree_renderer * rend_obj(new tree_renderer(&generator));
+	generator.setRenderer(rend_obj);
+	//generator.printTree();
+	//generator.traverseGeneratedTree();
+	rend_obj->simThresh = 10000;
+	rend_obj->iterations = parser->iterations;
+	
 	//Defining renderer pointer
 	glutCallBacks::renderer = rend_obj;
-
-	//Test string generator
-	tree_generator generator(parser, rend_obj);
-	generator.generateTree();
-	generator.printTree();
-	generator.traverseGeneratedTree();
-	_sleep(10000);
 
 	//Initlaizing Glut Window
 	/* Initialize the GLUT window */
@@ -42,7 +59,7 @@ int main(int argc, char **argv)
 	glutIdleFunc(glutCallBacks::idle);
 	glutKeyboardFunc(glutCallBacks::keyboardHandler);
 	glutMouseFunc(glutCallBacks::mouseHandler);
-
+	glutSpecialFunc(glutCallBacks::specialFunc);
 	/* Start the main GLUT loop */
 	/* NOTE: No code runs after this */
 	glutMainLoop();

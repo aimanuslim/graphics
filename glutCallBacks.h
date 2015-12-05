@@ -11,6 +11,7 @@ public:
 	static void idle();
 	static void keyboardHandler(unsigned char, int, int);
 	static void mouseHandler(int, int, int, int);
+	static void specialFunc(int, int, int);
 	glutCallBacks();
 	~glutCallBacks();
 };
