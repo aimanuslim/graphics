@@ -82,6 +82,9 @@ int numberofPoints = 1000;
 double setPointsColors[1000 * 3];
 Mode pointMode = Random; // Mode for points scattering
 
+// Noise
+double perlinOffsets[windowWidth * windowHeight * 3];
+
 // ************************* Island Location *************************** //
 double islandX = 0;
 double islandY = 0;
@@ -134,11 +137,13 @@ glm::mat4 projMatrix;
 GLint modelMatrixLocation;
 GLint viewMatrixLocation;
 GLint projMatrixLocation;
+GLint perlinLocation;
 
 /* Information of the rotation */
 float angle = 90.0f;
 float angleStep = PI / 500.0f;
 float rotate = 0.0f;
+float rotateStep = PI / 500.0f;
 
 
 
@@ -310,6 +315,8 @@ void initShadersVAOS(){
 		glEnableVertexAttribArray(1);
 
 
+
+
 		/* Initialize the shader program */
 		shaderProgram = glCreateProgram();
 		glAttachShader(shaderProgram, vertexShader);
@@ -323,6 +330,7 @@ void initShadersVAOS(){
 		modelMatrixLocation = glGetUniformLocation(shaderProgram, "modelMatrix");
 		viewMatrixLocation = glGetUniformLocation(shaderProgram, "viewMatrix");
 		projMatrixLocation = glGetUniformLocation(shaderProgram, "projMatrix");
+		perlinLocation = glGetUniformLocation(shaderProgram, "perlinData");
 
 
 //		glMatrixMode(GL_PROJECTION);
@@ -359,7 +367,7 @@ void init(){
 
 	// Define elevation
 	// * circleVertices arent drawn
-	circlePointCt = terrainInput(elevation, biomesInformation, circleVertices, circleColors);
+	circlePointCt = terrainInput(elevation, biomesInformation, circleVertices, circleColors, perlinOffsets);
 	idx = VoronoiVerticesColors(vd, &voronoiPoints, &voronoiColors);
 
 
@@ -436,7 +444,10 @@ void display(){
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, glm::value_ptr(projMatrix));
-
+	int i = (rand() % (int) (windowWidth * windowHeight * 3));
+	float perlinOff = (float) perlinOffsets[i];
+//	printf("Perlin off: %f", perlinOff);
+	glUniform1f(perlinLocation, (perlinOff));
 
 	// Use vertex to draw intensity
 	glUseProgram(shaderProgram);
@@ -446,7 +457,7 @@ void display(){
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	// Spin
-	rotate += angleStep;
+	rotate += rotateStep;
 	/* Force execution of OpenGL commands */
 	glFlush();
 

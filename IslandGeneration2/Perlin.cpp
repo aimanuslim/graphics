@@ -8,7 +8,7 @@
 #include "PerlinNoise.h"
 #include "IslandGeneration.h"
 
-void generatePerlinNoise(float * vertices){
+void generatePerlinNoise(double * vertices){
 
 	PerlinNoise pn;
 //	int x,y;
@@ -27,13 +27,15 @@ void generatePerlinNoise(float * vertices){
 
 	int i = 0, j = 0, xtemp;
 	double n;
+	int n_int;
 	while(j < windowHeight){
 		while(i < windowWidth * 3){
-			n = 20 * pn.noise((double) i, (double) j, 0.0);
-			n = n - floor(n);
+			n = pn.noise((double) i, (double) j, 0.0);
+//			n = n - floor(n);
+			n_int = n * 400;
 			xtemp = i / 3;
-//			vertices[i + j * windowWidth * 3] += ((int) floor(n) % 2) ? n : -n;
-//			vertices[(i + 1) + j * windowWidth * 3] += ((int) floor(n) % 2) ? n : -n;
+			(vertices)[i + j * windowWidth * 3] = ((int) n_int % 2) ? n : -n;
+			(vertices)[(i + 1) + j * windowWidth * 3] = ((int) n_int % 2) ? n : -n;
 			i += 3;
 		}
 		i = 0;

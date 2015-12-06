@@ -37,7 +37,7 @@ int vIdx = 0, colorIdx;
 //	}
 //}
 
-int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInformation[windowWidth][windowHeight], double * circleVertices, double * circleColor){
+int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInformation[windowWidth][windowHeight], double * circleVertices, double * circleColor, double * perlinOffsets){
 
 	int waterIdx;
 	int waterLocCount = 5;
@@ -139,7 +139,7 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 //	}
 
 	// Perlin, may or may not be needed
-	// generatePerlinNoise(circleVertices);
+	generatePerlinNoise(perlinOffsets);
 
 	biomesGeneration(circleColor, elevation, waterLocations, waterLocCount, biomesInformation);
 

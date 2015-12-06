@@ -89,7 +89,7 @@ void biomesGeneration(double * colors, double elevation[windowWidth][windowHeigh
 	int x, y, xidx, waterIdx;
 	double r, g, b;
 	int isWater, isHighest;
-	int rad = 300;
+	int rad = 400;
 
 	maxElevation = 0.0;
 	for(y = 0; y < windowHeight; y++){
@@ -143,21 +143,21 @@ void biomesGeneration(double * colors, double elevation[windowWidth][windowHeigh
 
 
 
-			switch(thisBiome){
-				case TROPRAINF: printf("Elevation: %.3f, Moisture: %.3f -> TROPRAINF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case TEMPRAINF: printf("Elevation: %.3f, Moisture: %.3f -> TEMPRAINF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case TROPSEASONF: printf("Elevation: %.3f, Moisture: %.3f -> TROPSEASONF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case TEMPDECIDF: printf("Elevation: %.3f, Moisture: %.3f -> TEMPDECIDF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case GRASSLAND: printf("Elevation: %.3f, Moisture: %.3f -> GRASSLAND idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case SHRUBLAND: printf("Elevation: %.3f, Moisture: %.3f -> SHRUBLAND idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case TAIGA: printf("Elevation: %.3f, Moisture: %.3f -> TAIGA idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case TUNDRA: printf("Elevation: %.3f, Moisture: %.3f -> TUNDRA idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case BARE: printf("Elevation: %.3f, Moisture: %.3f -> BARE idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case SCORCHED: printf("Elevation: %.3f, Moisture: %.3f -> SCORCHED idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case SUBTROPDESERT: printf("Elevation: %.3f, Moisture: %.3f -> SUBTROPDESERT idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case SNOW:printf("Elevation: %.3f, Moisture: %.3f -> SNOW idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-				case TEMPDESERT: printf("Elevation: %.3f, Moisture: %.3f -> TEMPDESERT idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
-			}
+//			switch(thisBiome){
+//				case TROPRAINF: printf("Elevation: %.3f, Moisture: %.3f -> TROPRAINF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case TEMPRAINF: printf("Elevation: %.3f, Moisture: %.3f -> TEMPRAINF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case TROPSEASONF: printf("Elevation: %.3f, Moisture: %.3f -> TROPSEASONF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case TEMPDECIDF: printf("Elevation: %.3f, Moisture: %.3f -> TEMPDECIDF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case GRASSLAND: printf("Elevation: %.3f, Moisture: %.3f -> GRASSLAND idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case SHRUBLAND: printf("Elevation: %.3f, Moisture: %.3f -> SHRUBLAND idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case TAIGA: printf("Elevation: %.3f, Moisture: %.3f -> TAIGA idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case TUNDRA: printf("Elevation: %.3f, Moisture: %.3f -> TUNDRA idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case BARE: printf("Elevation: %.3f, Moisture: %.3f -> BARE idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case SCORCHED: printf("Elevation: %.3f, Moisture: %.3f -> SCORCHED idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case SUBTROPDESERT: printf("Elevation: %.3f, Moisture: %.3f -> SUBTROPDESERT idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case SNOW:printf("Elevation: %.3f, Moisture: %.3f -> SNOW idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//				case TEMPDESERT: printf("Elevation: %.3f, Moisture: %.3f -> TEMPDESERT idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
+//			}
 
 //			if(moisture < 5 * moistureZoneDiv){ g *= 1.1;}
 //			else{ b *= 1.5; }
@@ -170,26 +170,27 @@ void biomesGeneration(double * colors, double elevation[windowWidth][windowHeigh
 //				colors[(x + 0) + y * windowWidth * 3] += r;
 //				colors[(x + 0) + y * windowWidth * 3] = colors[(x + 0) + y * windowWidth * 3] / 2 + r;
 //				colors[(x + 0) + y * windowWidth * 3] = r * m  + elevation[xidx][y] * m;
-//				colors[(x + 0) + y * windowWidth * 3] = (moisture > 0) ? 0.0f : r * 0.8;
-				colors[(x + 0) + y * windowWidth * 3] = r * 0.8;
+				colors[(x + 0) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] < (1.0 / pow(10, 6)))) ? 0.0f : r * 0.8;
+//				colors[(x + 0) + y * windowWidth * 3] = r * 0.8;
 //				colors[(x + 0) + y * windowWidth * 3] = 0.8f;
 
 
 //				colors[(x + 0) + y * windowWidth * 3] = r * m;
 //				colors[(x + 0) + y * windowWidth * 3] *= 2;
-				colors[(x + 1) + y * windowWidth * 3] = g * 0.8;
+//				colors[(x + 1) + y * windowWidth * 3] = g * 0.8;
+//				colors[(x + 1) + y * windowWidth * 3] = g * 0.8 -((elevation[xidx][y] < 0.005) ? 0.2 : 0.0)
 //				colors[(x + 1) + y * windowWidth * 3] = 0.0f;
 				//				colors[(x + 1) + y * windowWidth * 3] = colors[(x + 1) + y * windowWidth * 3] / 2 + g;
 //				colors[(x + 1) + y * windowWidth * 3] = g * m + elevation[xidx][y] * m;
-//				colors[(x + 1) + y * windowWidth * 3] = (moisture > 0) ? 0.0f : g * 0.8;
+				colors[(x + 1) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] < (1.0 / pow(10, 6)))) ? 0.0f : g * 0.8;
 				//				colors[(x + 1) + y * windowWidth * 3] = g * m;
 
 //				colors[(x + 1) + y * windowWidth * 3] *= 2;
-				colors[(x + 2) + y * windowWidth * 3] = b * 0.8;
+//				colors[(x + 2) + y * windowWidth * 3] = b * 0.8;
 //				colors[(x + 2) + y * windowWidth * 3] = 0.0f;
 //				colors[(x + 2) + y * windowWidth * 3] = b * m + elevation[xidx][y] * m + moisture * m;
 //				colors[(x + 2) + y * windowWidth * 3] = elevation[xidx][y] * m + moisture * m;
-//				colors[(x + 2) + y * windowWidth * 3] = (moisture > 0) ? moisture : b * 0.8;
+				colors[(x + 2) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] < (1.0 / pow(10, 6)))) ? moisture - 0.5 : b * 0.8;
 //				colors[(x + 2) + y * windowWidth * 3] *= 2;
 
 				if(colors[(x + 0) + y * windowWidth * 3] > 1.0){colors[(x + 0) + y * windowWidth * 3] = 1.0;}

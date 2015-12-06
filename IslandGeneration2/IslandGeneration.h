@@ -55,7 +55,7 @@ void biomesGeneration(double * colors, double elevation[windowWidth][windowHeigh
 
 #define elevDiffThreshold 0.3
 
-int terrainInput(double elevation[windowWidth][windowHeight], Biome b[windowWidth][windowHeight], double *, double *);
+int terrainInput(double elevation[windowWidth][windowHeight], Biome b[windowWidth][windowHeight], double *, double *, double *);
 
 
 double normalize(int, int);
