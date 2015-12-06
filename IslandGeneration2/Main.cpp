@@ -377,6 +377,7 @@ void init(){
 	// Adjust voronoi points
 	voronoiVertices = adjustVoronoi(&voronoiPoints, &voronoiColors, elevation, circleColors, idx);
 
+
 	// Initialize shaders
 	initShadersVAOS();
 

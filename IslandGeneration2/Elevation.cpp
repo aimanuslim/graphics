@@ -40,7 +40,7 @@ int vIdx = 0, colorIdx;
 int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInformation[windowWidth][windowHeight], double * circleVertices, double * circleColor){
 
 	int waterIdx;
-	int waterLocCount = 10;
+	int waterLocCount = 5;
 	terrain  waterLocations[waterLocCount];
 	for(waterIdx = 0; waterIdx < waterLocCount; waterIdx++){
 		waterLocations[waterIdx].x = (rand() % (int) windowWidth) + 1;
@@ -49,7 +49,7 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 		waterLocations[waterIdx].waterValue = 1.0f;
 	}
 
-	int circlesCt = 10;
+	int circlesCt = 15;
 	int circleIdx;
 	//terrain allIntensity[circlesCt] = {intensity1, intensity2, intensity3, intensity4, intensity5, intensity6};
 	terrain allIntensity[circlesCt];
@@ -146,3 +146,4 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 	return windowWidth * windowHeight;
 
 }
+
