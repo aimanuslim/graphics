@@ -1,45 +1,67 @@
 #include "part_model.h"
 
-part_model::part_model(part_model::PART_TYPE part)
+part_model::part_model(PART_TYPE part)
 {
 	this->type = part;
 }
 
-void part_model::setParameters(short length, float angle)
+void part_model::setParameters(float length, float width, double angle)
 {
 	this->length = length;
 	this->angle = angle;
+	this->width = width;
 }
 
 void part_model::setPosition(float x, float y, float z)
 {
-	this->basePos = std::pair<float, float>(x, y);
+	this->basePos = tuple3d(x, y, z);
+}
+
+void part_model::setDirection(float x, float y, float z)
+{
+	this->dir = tuple3d(x, y, z);
 }
 
 void part_model::setColor(float r, float g, float b)
 {
-	this->color = std::tuple<float, float, float>(r, g, b);
+	this->color = tuple3d(r, g, b);
 }
 
-std::pair<float, float>& part_model::getBasePos()
+PART_TYPE part_model::getType()
+{
+	return this->type;
+}
+
+tuple3d& part_model::getBasePos()
 {
 	return this->basePos;
 }
 
-std::tuple<float, float, float>& part_model::getColor()
+tuple3d& part_model::getColor()
 {
 	return this->color;
 }
 
-float part_model::getAngle()
+tuple3d& part_model::getDir()
+{
+	return this->dir;
+}
+
+double part_model::getAngle()
 {
 	return angle;
 }
 
-int part_model::getLength()
+float part_model::getLength()
 {
 	return this->length;
 }
+
+float part_model::getWidth()
+{
+	return this->length;
+}
+
 
 part_model::~part_model()
 {

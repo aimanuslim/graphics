@@ -1,7 +1,7 @@
 /*
 
 	Parser for parsing the input text file and generating structures for representing inormation
-	Meta information (angle, ratios, iterations)
+	Meta information (branching and phyllotactic angle, ratios, iterations)
 	V - set of alphabets in grammar
 	w - starting symbols
 	P - production rules
@@ -14,8 +14,8 @@
 	\ -> Roll left by alpha
 	/ -> Roll right by alpha
 	| -> Turn around
-	[ - Push to Stack current properties/position
-	] - Pop from stack current position/propoerties
+	[ -> Push to Stack current properties/position
+	] -> Pop from stack current position/propoerties
 
 	Format of input grammar file
 	Meta-information
@@ -26,7 +26,15 @@
 
 	Production rules
 	Example : F -> FF[F+F[F[L][-L]]+F[++L]][FFF[+L][L][-L]]-F-FF[L][-L]
+	Example 2 (edge-rewriting) : F -> F[+F]F[-F][F]
 
+	Example 3 (node-rewriting) : L -> F[+L][-L]FL (2D)
+							     F -> FF (2D)
+								 F-> [^&+L][+^&L]F[>>L&-L][<&L] {3D)
+
+	Example 4 (3-D tree with inter-plane angle) : F -> GG[-GF][+F]
+		
+	Bush Like Structure with lower branch height - : F[&+-L][^+&L]F[+L][-L][^F]L
 */
 #ifndef GRAMMAR_PARSER
 #define GRAMMAR_PARSER

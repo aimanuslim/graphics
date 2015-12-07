@@ -51,13 +51,13 @@ void grammar_parser::parseFile()
 			meta_data = std::regex("(\\w{1,})\\s(\\d+[\.]?[\\d]*)");
 			while (std::regex_search(substring, match, meta_data))
 			{
-				printf("\nMatched string pattern for meta information : %s\n", match.str().c_str());
+				//printf("\nMatched string pattern for meta information : %s\n", match.str().c_str());
 				//_sleep(1000);
 				if (match.str(1) == "iterations")
 					iterations = atoi((match).str(2).c_str());
 				else if (match.str(1) == "angle")
 				{
-					printf("Enters angle recignition\n");
+					//printf("Enters angle recignition\n");
 					angle = atof(match.str(2).c_str());
 				}
 				else
@@ -71,12 +71,12 @@ void grammar_parser::parseFile()
 		//Alphabets
 		if (std::regex_search(grammar, match, alphabets))
 		{
-			printf("Matched string pattern for alphabets : %s\n", match.str().c_str());
+			//printf("Matched string pattern for alphabets : %s\n", match.str().c_str());
 			substring = match.str(1);
 			alphabets = std::regex("\\w{1}");
 			while(std::regex_search(substring, match, alphabets))
 			{
-				printf("Matched alphabets : %s\n", match.str().c_str());
+				//printf("Matched alphabets : %s\n", match.str().c_str());
 				//_sleep(1000);
 				this->axioms.push_back(match.str());
 				substring = match.suffix().str();
@@ -86,7 +86,7 @@ void grammar_parser::parseFile()
 		//Starting Symbol
 		if (std::regex_search(grammar, match, starting_symb))
 		{
-			printf("Matched string pattern for starting symbol : %s\n", match.str(1).c_str());
+			//printf("Matched string pattern for starting symbol : %s\n", match.str(1).c_str());
 			if (match.size() > 0)
 				this->start_symb = match.str(1);
 		}
@@ -96,7 +96,7 @@ void grammar_parser::parseFile()
 		{
 			printf("Matched string pattern for rules : %s\n", match.str().c_str());
 			substring = match.str(0);
-			rules_regex = std::regex("(\\w+)\\s->\\s([\\w+^\\\+-\\[\\]]+)");
+			rules_regex = std::regex("(\\w+)\\s->\\s([\\w+&^\\\+-\\[\\]]+)");
 			while(std::regex_search(substring, match, rules_regex))
 			{
 
