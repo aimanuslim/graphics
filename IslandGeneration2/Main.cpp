@@ -67,7 +67,7 @@ GLuint fragmentShader = 0;
 GLuint shaderProgram = 0;
 
 /* Information about the texture */
-const char* textureFile = "water_blue.jpg";
+const char* textureFile = "blue.jpg";
 unsigned char* textureData;
 GLint textureDataLocation;
 int textureWidth;
@@ -140,6 +140,7 @@ int *voronoiPoints;
 double *voronoiColors;
 double * voronoiVertices;
 double * voronoiCoords;
+double * voronoiNormals;
 double delaunayPoints[windowWidth * windowHeight * 3 * 3];
 double delaunayColors[windowWidth * windowHeight * 3 * 3];
 int idx = 0; // idx for putting in points for voronoiPoints
@@ -349,9 +350,9 @@ void initShadersVAOS(){
 		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * (idx / 3) * 2, voronoiCoords, GL_STATIC_DRAW);
 
 //		/* Initialize the Vertex Buffer Object for the normal vectors */
-//		glGenBuffers(1, &normalsVbo);
-//		glBindBuffer(GL_ARRAY_BUFFER, normalsVbo);
-//		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * idx, voronoiVertices, GL_STATIC_DRAW);
+		glGenBuffers(1, &normalsVbo);
+		glBindBuffer(GL_ARRAY_BUFFER, normalsVbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * idx * 3, voronoiNormals, GL_STATIC_DRAW);
 
 
 		/* Set the texture of the model */
@@ -467,6 +468,9 @@ void init(){
 
 	// Find coords
 	voronoiCoords = findCoords(&voronoiPoints, idx);
+
+	// Find normals
+	voronoiNormals = findNormals(voronoiVertices, idx);
 
 	// Initialize shaders
 	initShadersVAOS();

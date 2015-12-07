@@ -107,5 +107,6 @@ VD generateVoronoi(int **, int);
 double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[windowWidth][windowHeight], glm::vec3 landColor[windowWidth][windowHeight], int idx);
 int VoronoiVerticesColors(VD vd, int ** voronoiPoints, double ** voronoiColors);
 double * findCoords(int **, int);
+double * findNormals(double * voronoiVertices, int vmax);
 
 #endif
