@@ -37,14 +37,17 @@ int vIdx = 0, colorIdx;
 //	}
 //}
 
-int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInformation[windowWidth][windowHeight], double * circleVertices, double * circleColor, double * perlinOffsets){
+int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInformation[windowWidth][windowHeight], double * circleVertices, glm::vec3 circleColor[windowWidth][windowHeight], glm::vec3 perlinOffsets[windowWidth][windowHeight]){
 
 	int waterIdx;
-	int waterLocCount = 5;
+	int waterLocCount = 10;
 	terrain  waterLocations[waterLocCount];
 	for(waterIdx = 0; waterIdx < waterLocCount; waterIdx++){
 		waterLocations[waterIdx].x = (rand() % (int) windowWidth) + 1;
+//		waterLocations[waterIdx].x = 700;
 		waterLocations[waterIdx].y = (rand() % (int) windowHeight) + 1;
+//		waterLocations[waterIdx].y = 600;
+
 		//printf("Water location %d -> x: %d y: %d\n", waterIdx, waterLocations[waterIdx].x, waterLocations[waterIdx].y);
 		waterLocations[waterIdx].waterValue = 1.0f;
 	}
@@ -53,16 +56,21 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 	int circleIdx;
 	//terrain allIntensity[circlesCt] = {intensity1, intensity2, intensity3, intensity4, intensity5, intensity6};
 	terrain allIntensity[circlesCt];
+	int heightRand;
+	int maxHeight = 500;
 	for(circleIdx = 0; circleIdx < circlesCt; circleIdx++){
 		allIntensity[circleIdx].x = (rand() % (int) windowWidth) + 1;
 		allIntensity[circleIdx].y = (rand() % (int) windowHeight) + 1;;
-		allIntensity[circleIdx].intensity = 0.5f;
+		heightRand = (rand() % maxHeight);
+		allIntensity[circleIdx].intensity = 0.4f;
+//		allIntensity[circleIdx].intensity = ((double) heightRand / maxHeight) * 0.4f;
 	}
 
-	double xpos0, xpos1, ypos0, ypos1, r;
+	double xpos0, xpos1, ypos0, ypos1, r, rmax, myPow;
 	double theta = 0;
 	int vi = 0, coli = 0, i;
-	r = 200; // for circles
+	rmax = 400; // for circles
+	r = 200;
 
 	int x,y;
 	i = 0;
@@ -70,18 +78,30 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 	for(x = 0; x < windowWidth; x++){
 		for(y = 0; y < windowHeight; y++){
 			for(i = 0; i < circlesCt; i++){
+//				r = (double) (rand() % (int) (rmax / 2)) + (rmax / 2);
 				distFromCenter = sqrt( (double) pow(allIntensity[i].x - x, 2) + (double) pow(allIntensity[i].y - y, 2));
 				distFromCenter = ((distFromCenter / r) > 1) ? 1.0f : (distFromCenter / r);
+
 				if(distFromCenter <= 1.000000f){
 					// the further you are, the less intensity, lower elevation
-					elevation[x][y] +=  allIntensity[i].intensity * (1.0f - distFromCenter);
-//					if(elevation[x][y] > 1.0){ elevation[x][y] = 1.0; }
+
+					if((1.0 - distFromCenter) < (1.0 /3.0)){
+						myPow = 2;
+					} else if((1.0 - distFromCenter) < (2.0 * 1.0 /3.0)){
+						myPow = 1;
+					} else {
+						myPow = 0.5;
+					}
+
+					elevation[x][y] +=  allIntensity[i].intensity * pow(1.0 - distFromCenter, myPow);
 				}
 				else {
 					elevation[x][y] +=  0.0f;
 				}
 			}
 //			elevation[x][y] *= 0.6;
+//			printf("Elevation at (%d, %d): %lf\n", x, y, elevation[x][y]);
+//			printf("Elevation: %lf\n", elevation[x][y]);
 		}
 	}
 
@@ -139,7 +159,7 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 //	}
 
 	// Perlin, may or may not be needed
-	generatePerlinNoise(perlinOffsets);
+	generatePerlinNoise(perlinOffsets, elevation);
 
 	biomesGeneration(circleColor, elevation, waterLocations, waterLocCount, biomesInformation);
 

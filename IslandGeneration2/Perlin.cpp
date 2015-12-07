@@ -8,7 +8,7 @@
 #include "PerlinNoise.h"
 #include "IslandGeneration.h"
 
-void generatePerlinNoise(double * vertices){
+void generatePerlinNoise(glm::vec3 perlinMatrix[windowWidth][windowHeight], double elevation[windowWidth][windowHeight]){
 
 	PerlinNoise pn;
 //	int x,y;
@@ -29,14 +29,12 @@ void generatePerlinNoise(double * vertices){
 	double n;
 	int n_int;
 	while(j < windowHeight){
-		while(i < windowWidth * 3){
-			n = pn.noise((double) i, (double) j, 0.0);
-//			n = n - floor(n);
-			n_int = n * 400;
-			xtemp = i / 3;
-			(vertices)[i + j * windowWidth * 3] = ((int) n_int % 2) ? n : -n;
-			(vertices)[(i + 1) + j * windowWidth * 3] = ((int) n_int % 2) ? n : -n;
-			i += 3;
+		while(i < windowWidth){
+			n = 2.0 * pn.noise((double) i, (double) j, elevation[i][j]);
+			perlinMatrix[i][j].x = 0;
+			perlinMatrix[i][j].y = 0;
+			perlinMatrix[i][j].z = n;
+			i++;
 		}
 		i = 0;
 		j++;

@@ -6,6 +6,7 @@
  */
 
 #include "IslandGeneration.h"
+#include "PerlinNoise.h"
 
 int biomeColors[biomeMax][3] = {
 		{248,248,248}, // snow
@@ -85,11 +86,12 @@ void findCategory(double elevation, double moisture, int * category){
 //	}
 }
 
-void biomesGeneration(double * colors, double elevation[windowWidth][windowHeight], terrain * waterLocations, int waterCt, Biome biomesInfo[windowWidth][windowHeight]){
+
+void biomesGeneration(glm::vec3 colors[windowWidth][windowHeight], double elevation[windowWidth][windowHeight], terrain * waterLocations, int waterCt, Biome biomesInfo[windowWidth][windowHeight]){
 	int x, y, xidx, waterIdx;
 	double r, g, b;
 	int isWater, isHighest;
-	int rad = 400;
+	int maxrad = 1000, rad;
 
 	maxElevation = 0.0;
 	for(y = 0; y < windowHeight; y++){
@@ -98,15 +100,20 @@ void biomesGeneration(double * colors, double elevation[windowWidth][windowHeigh
 			}
 	}
 
-	printf("Max elevation: %f\n", maxElevation);
+//	printf("Max elevation: %f\n", maxElevation);
 
+	PerlinNoise pn;
+	float n;
 	double moisture, distFromCenter;
 	for(y = 0; y < windowHeight; y++){
-		for(x = 0; x < windowWidth * 3; x++){
-			xidx = x / 3;
+		for(x = 0; x < windowWidth; x++){
+//			xidx = x / 3;
+			xidx = x;
 
 			moisture = 0;
 			for(waterIdx = 0; waterIdx < waterCt; waterIdx++){
+				n = pn.noise( (double) x / windowWidth, (double) y / windowHeight, 0.0);
+				rad = maxrad * (n - floor(n));
 				// find moisture
 				distFromCenter = sqrt( (double) pow(waterLocations[waterIdx].x - xidx, 2) + (double) pow(waterLocations[waterIdx].y - y, 2));
 				distFromCenter = ((distFromCenter / rad) > 1) ? 1.0f : (distFromCenter / rad);
@@ -116,8 +123,9 @@ void biomesGeneration(double * colors, double elevation[windowWidth][windowHeigh
 				if(moisture > 1.0){moisture = 1.0f;}
 				if(moisture < 0.0){moisture = 0.0f;}
 			}
-
-//			moisture *= 0.6;
+//			printf("Elevation at (%d, %d): %f\n", xidx, y, elevation[xidx][y]);
+//			printf("Moisture at (%d, %d): %f\n", xidx, y, moisture);
+			//			moisture *= 0.6;
 //			moisture *= 0.3;
 
 			// find category
@@ -142,7 +150,7 @@ void biomesGeneration(double * colors, double elevation[windowWidth][windowHeigh
 
 
 
-
+//
 //			switch(thisBiome){
 //				case TROPRAINF: printf("Elevation: %.3f, Moisture: %.3f -> TROPRAINF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
 //				case TEMPRAINF: printf("Elevation: %.3f, Moisture: %.3f -> TEMPRAINF idx: e: %d m: %d\n", elevation[xidx][y], moisture, category[0], category[1]); break;
@@ -164,45 +172,34 @@ void biomesGeneration(double * colors, double elevation[windowWidth][windowHeigh
 
 
 			// change colors
-//			double m = (double) 1 / 3;
 			double m = (double) 1 / 2;
-			if(x % 3 == 0){
-//				colors[(x + 0) + y * windowWidth * 3] += r;
-//				colors[(x + 0) + y * windowWidth * 3] = colors[(x + 0) + y * windowWidth * 3] / 2 + r;
-//				colors[(x + 0) + y * windowWidth * 3] = r * m  + elevation[xidx][y] * m;
-				colors[(x + 0) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] < (1.0 / pow(10, 6)))) ? 0.0f : r * 0.8;
-//				colors[(x + 0) + y * windowWidth * 3] = r * 0.8;
-//				colors[(x + 0) + y * windowWidth * 3] = 0.8f;
+//			if(x % 3 == 0){
+				colors[x][y].r = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : r * 0.8;
+				colors[x][y].g = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : g * 0.8;
+				colors[x][y].b = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? moisture - 0.5 : b * 0.8;
+
+//				colors[(x + 0) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : r * 0.8;
+
+//				colors[(x + 1) + y * windowWidth * 3] = ((moisture > 0.6) && (elevation[xidx][y] < ((double) 1.0 / pow(10, 6)))) ? 0.0f : g * 0.8;
+//				colors[(x + 1) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : g * 0.8;
 
 
-//				colors[(x + 0) + y * windowWidth * 3] = r * m;
-//				colors[(x + 0) + y * windowWidth * 3] *= 2;
-//				colors[(x + 1) + y * windowWidth * 3] = g * 0.8;
-//				colors[(x + 1) + y * windowWidth * 3] = g * 0.8 -((elevation[xidx][y] < 0.005) ? 0.2 : 0.0)
-//				colors[(x + 1) + y * windowWidth * 3] = 0.0f;
-				//				colors[(x + 1) + y * windowWidth * 3] = colors[(x + 1) + y * windowWidth * 3] / 2 + g;
-//				colors[(x + 1) + y * windowWidth * 3] = g * m + elevation[xidx][y] * m;
-				colors[(x + 1) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] < (1.0 / pow(10, 6)))) ? 0.0f : g * 0.8;
-				//				colors[(x + 1) + y * windowWidth * 3] = g * m;
-
-//				colors[(x + 1) + y * windowWidth * 3] *= 2;
-//				colors[(x + 2) + y * windowWidth * 3] = b * 0.8;
-//				colors[(x + 2) + y * windowWidth * 3] = 0.0f;
-//				colors[(x + 2) + y * windowWidth * 3] = b * m + elevation[xidx][y] * m + moisture * m;
-//				colors[(x + 2) + y * windowWidth * 3] = elevation[xidx][y] * m + moisture * m;
-				colors[(x + 2) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] < (1.0 / pow(10, 6)))) ? moisture - 0.5 : b * 0.8;
+//				colors[(x + 2) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? moisture - 0.5 : b * 0.8;
+				if(((elevation[xidx][y] != 0.0000000000000000000f))){
+//					printf("Non zero Elevation: %0.8lf\n", elevation[xidx][y]);
+				}
 //				colors[(x + 2) + y * windowWidth * 3] *= 2;
 
-				if(colors[(x + 0) + y * windowWidth * 3] > 1.0){colors[(x + 0) + y * windowWidth * 3] = 1.0;}
-				if(colors[(x + 1) + y * windowWidth * 3] > 1.0){colors[(x + 1) + y * windowWidth * 3] = 1.0;}
-				if(colors[(x + 2) + y * windowWidth * 3] > 1.0){colors[(x + 2) + y * windowWidth * 3] = 1.0;}
+//				if(colors[(x + 0) + y * windowWidth * 3] > 1.0){colors[(x + 0) + y * windowWidth * 3] = 1.0;}
+//				if(colors[(x + 1) + y * windowWidth * 3] > 1.0){colors[(x + 1) + y * windowWidth * 3] = 1.0;}
+//				if(colors[(x + 2) + y * windowWidth * 3] > 1.0){colors[(x + 2) + y * windowWidth * 3] = 1.0;}
 
 //				if(thisBiome == SUBTROPDESERT){
 //							colors[(x + 0) + y * windowWidth * 3] = r * 0.9;
 //							colors[(x + 1) + y * windowWidth * 3] = g * 0.9;
 //							colors[(x + 2) + y * windowWidth * 3] = b * 0.9;
 //						}
-			}
+//			}
 
 		}
 	}

@@ -12,63 +12,80 @@
 #include <math.h>
 #include "IslandGeneration.h"
 
-double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[windowWidth][windowHeight], double * landColor, int idx){
+// GLM stuffs
+#include "glm/vec2.hpp"
+
+double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[windowWidth][windowHeight], glm::vec3 landColor[windowWidth][windowHeight], int idx){
 	int x = 0, y = 0, i = 0;
 	double currHeight;
 	double * resVorPos;
 	*voronoiColors =  (double *) calloc( idx,  sizeof(double) );
 	resVorPos =  (double *) calloc( idx,  sizeof(double) );
-
+	double maxElev = 0;
 	while(i < idx){
 //		x = (int) ( ( (double) ((*voronoiPositions)[i] + 1.0f) / 2.0f)     * windowWidth);
 //		y = (int) ( ( (double) ((*voronoiPositions)[i + 1] + 1.0f) / 2.0f) * windowHeight);
 		x = (*voronoiPositions)[i];
 		y = (*voronoiPositions)[i + 1];
-		x -= (x % 3);
-		y -= (y % 3);
+//		x *= 3;
 
 		if(
-			(x >= 0 && x <= windowWidth) &&
-			(y >= 0 && y <= windowHeight)
+			(x >= 0 && x < windowWidth) &&
+			(y >= 0 && y < windowHeight)
 		){
 
 			resVorPos[i] = normalize(x, windowWidth);
 			resVorPos[i + 1] = normalize(y, windowHeight);
 			//z-value
 			currHeight = elevation[x][y];
+			if(maxElev < currHeight){ maxElev = currHeight ; }
 //			(*voronoiPositions)[i + 2] = -currHeight;
 			resVorPos[i + 2] = -currHeight;
+//			printf("Voronoi pos: (%d, %d) E: %f\n", x, y, resVorPos[i + 2]);
 
 //			*voronoiColors =  (double *) realloc((*voronoiColors), (i+ 3) *  sizeof(double) );
 			// r
-			(*voronoiColors)[i] = landColor[x + y * windowWidth * 3];
+			(*voronoiColors)[i] = landColor[x][y].r;
 //			(*voronoiColors)[i] *= 1.3;
 			// g
-			(*voronoiColors)[i + 1] = landColor[x + 1 + y * windowWidth * 3];
+			(*voronoiColors)[i + 1] = landColor[x][y].g;
 //			(*voronoiColors)[i + 1] *= 1.3;
 			// b
-			(*voronoiColors)[i + 2] = landColor[x + 2 + y * windowWidth * 3];
+			(*voronoiColors)[i + 2] = landColor[x][y].b;
 //			(*voronoiColors)[i + 2] *= 0.4;
 
 //			}
+
+		} else{
+			if(x < 0){ resVorPos[i] = -1; }
+			else { resVorPos[i] = 1; }
+			if(y < 0){ resVorPos[i + 1] = -1; }
+			else { resVorPos[i + 1] = 1; }
+			resVorPos[i + 2] = 0;
 		}
-		else{
-//			(*voronoiPositions)[i + 0] = (x < 0) ? -1 : 1;
-//			(*voronoiPositions)[i + 1] = (y < 0) ? -1 : 1;
-//			(*voronoiPositions)[i + 2] = ZPOS - 0.7;
-			resVorPos[i + 0] = (x < 0) ? -1 : 1;
-			resVorPos[i + 1] = (y < 0) ? -1 : 1;
-			resVorPos[i + 2] = ZPOS - 0.7;
-		}
+
 
 		i += 3;
 
 	}
+	printf("Max voronoi height: %f", maxElev);
 	return resVorPos;
 
 }
 
-
+double * findCoords(int ** voronoiPoints, int vmax){
+	int i = 0;
+	glm::vec2 p0,p1,p2;
+	int vp = vmax / 3;
+	double * waterCoords = (double *) malloc(vp * 2 * sizeof(double));
+	while(i < (vp * 2)){
+		p0.x = (double) (*voronoiPoints)[i] / windowWidth;
+		p0.y = (double) (*voronoiPoints)[i + 1] / windowHeight;
+		waterCoords[i++] = p0.x;
+		waterCoords[i++] = p0.y;
+	}
+	return waterCoords;
+}
 
 int VoronoiVerticesColors(VD vd, int ** voronoiPoints, double ** voronoiColors){
 

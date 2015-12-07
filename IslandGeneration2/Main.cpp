@@ -17,6 +17,7 @@
 #include <string>
 
 #include "IslandGeneration.h"
+#include "stb_image.h"
 
 // GLM stuffs
 #include "glm/vec3.hpp"
@@ -30,6 +31,10 @@ GLuint vertexVbo; // circles
 GLuint colorVbo; // circles
 GLuint circlesVao;
 
+// Texture buffers
+GLuint coordsVbo;
+GLuint normalsVbo;
+
 // Points buffers
 GLuint pointsVbo;
 GLuint pointsColorsVbo;
@@ -41,9 +46,9 @@ GLuint voronoiVao;
 GLuint voronoiColorsVbo;
 
 // Delaunay points buffer
-GLuint delaunayVbo;
-GLuint delaunayColorsVbo;
-GLuint delaunayVao;
+GLuint perlinVbo;
+GLuint perlinColorsVbo;
+GLuint perlinVao;
 
 
 // Water buffers
@@ -61,6 +66,22 @@ GLuint vertexShader = 0;
 GLuint fragmentShader = 0;
 GLuint shaderProgram = 0;
 
+/* Information about the texture */
+const char* textureFile = "water_blue.jpg";
+unsigned char* textureData;
+GLint textureDataLocation;
+int textureWidth;
+int textureHeight;
+int textureComp;
+
+/* Information about the normal */
+const char* normalFile = "water_normal.jpg";
+unsigned char* normalData;
+GLint normalDataLocation;
+int normalWidth;
+int normalHeight;
+int normalComp;
+
 // Water
 //double waterVertices[windowWidth * windowHeight * 3] = {0};
 //double waterColors [windowWidth * windowHeight * 3] = {0};
@@ -71,19 +92,21 @@ double thres = 0.0005;
 
 // Circle
 double circleVertices[windowWidth * windowHeight * 3];
-double circleColors[windowWidth * windowHeight * 3];
+//double circleColors[windowWidth * windowHeight * 3];
+glm::vec3 circleColors[windowWidth][windowHeight];
 int circlePointCt;
 double elevation[windowWidth][windowHeight] = {0};
 Biome biomesInformation[windowWidth][windowHeight];
 
 // Points
 int * setPoints;
-int numberofPoints = 1000;
+int numberofPoints = 8000;
 double setPointsColors[1000 * 3];
 Mode pointMode = Random; // Mode for points scattering
 
 // Noise
-double perlinOffsets[windowWidth * windowHeight * 3];
+glm::vec3 perlinOffsets[windowWidth][windowHeight];
+double *perlinArray;//[windowWidth * windowHeight * 3];
 
 // ************************* Island Location *************************** //
 double islandX = 0;
@@ -116,6 +139,7 @@ float dist = 0;
 int *voronoiPoints;
 double *voronoiColors;
 double * voronoiVertices;
+double * voronoiCoords;
 double delaunayPoints[windowWidth * windowHeight * 3 * 3];
 double delaunayColors[windowWidth * windowHeight * 3 * 3];
 int idx = 0; // idx for putting in points for voronoiPoints
@@ -132,6 +156,7 @@ VD vd;
 glm::mat4 modelMatrix;
 glm::mat4 viewMatrix;
 glm::mat4 projMatrix;
+glm::mat4 translation;
 
 /* The location of the transformation matrices */
 GLint modelMatrixLocation;
@@ -206,26 +231,26 @@ void initShadersVAOS(){
 			std::cout << "Error while compiling the fragment shader: " << std::endl << buffer << std::endl;
 		}
 
-		/****************************************** Delaunay Data VAO*********************************************/
+		/****************************************** Perlin Data VAO*********************************************/
 
-		glGenBuffers(1, &delaunayVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, delaunayVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(delaunayPoints), delaunayPoints, GL_STATIC_DRAW);
-
-		/* Initialize the Vertex Buffer Object for the colors of the vertices */
-		glGenBuffers(1, &delaunayColorsVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, delaunayColorsVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(delaunayColors), delaunayColors, GL_STATIC_DRAW);
-
-		/* Define the Vertex Array Object for the points */
-		glGenVertexArrays(1, &delaunayVao);
-		glBindVertexArray(delaunayVao);
-		glBindBuffer(GL_ARRAY_BUFFER, delaunayVbo);
-		glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
-		glBindBuffer(GL_ARRAY_BUFFER, delaunayColorsVbo);
-		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
+//		glGenBuffers(1, &perlinVbo);
+//		glBindBuffer(GL_ARRAY_BUFFER, perlinVbo);
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * 3 * windowWidth * windowHeight, perlinArray, GL_STATIC_DRAW);
+//
+//		/* Initialize the Vertex Buffer Object for the colors of the vertices */
+//		glGenBuffers(1, &perlinColorsVbo);
+//		glBindBuffer(GL_ARRAY_BUFFER, perlinColorsVbo);
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(perlinColors), perlinColors, GL_STATIC_DRAW);
+//
+//		/* Define the Vertex Array Object for the points */
+//		glGenVertexArrays(1, &perlinVao);
+//		glBindVertexArray(perlinVao);
+//		glBindBuffer(GL_ARRAY_BUFFER, perlinVbo);
+//		glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
+//		glBindBuffer(GL_ARRAY_BUFFER, perlinColorsVbo);
+//		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
+//		glEnableVertexAttribArray(0);
+//		glEnableVertexAttribArray(1);
 
 		/******************************************Points Data VAO*********************************************/
 		glGenBuffers(1, &pointsVbo);
@@ -268,25 +293,25 @@ void initShadersVAOS(){
 		glEnableVertexAttribArray(1);
 
 		/******************************************Circle Data VAO*********************************************/
-		/* Initialize the Vertex Buffer Object for the location of the vertices */
-		glGenBuffers(1, &vertexVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * circlePointCt * 3, circleVertices, GL_STATIC_DRAW);
-
-		/* Initialize the Vertex Buffer Object for the colors of the vertices */
-		glGenBuffers(1, &colorVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * circlePointCt * 3, circleColors, GL_STATIC_DRAW);
-
-		/* Define the Vertex Array Object for the circles */
-		glGenVertexArrays(1, &circlesVao);
-		glBindVertexArray(circlesVao);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexVbo);
-		glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
-		glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
-		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
+//		/* Initialize the Vertex Buffer Object for the location of the vertices */
+//		glGenBuffers(1, &vertexVbo);
+//		glBindBuffer(GL_ARRAY_BUFFER, vertexVbo);
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * circlePointCt * 3, circleVertices, GL_STATIC_DRAW);
+//
+//		/* Initialize the Vertex Buffer Object for the colors of the vertices */
+//		glGenBuffers(1, &colorVbo);
+//		glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * circlePointCt * 3, NULL, GL_STATIC_DRAW);
+//
+//		/* Define the Vertex Array Object for the circles */
+//		glGenVertexArrays(1, &circlesVao);
+//		glBindVertexArray(circlesVao);
+//		glBindBuffer(GL_ARRAY_BUFFER, vertexVbo);
+//		glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
+//		glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+//		glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 0, NULL);
+//		glEnableVertexAttribArray(0);
+//		glEnableVertexAttribArray(1);
 
 
 
@@ -316,6 +341,44 @@ void initShadersVAOS(){
 
 
 
+		/****************************************** Load textures ********************************************/
+
+		// texture coordinates
+		glGenBuffers(1, &coordsVbo);
+		glBindBuffer(GL_ARRAY_BUFFER, coordsVbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * (idx / 3) * 2, voronoiCoords, GL_STATIC_DRAW);
+
+//		/* Initialize the Vertex Buffer Object for the normal vectors */
+//		glGenBuffers(1, &normalsVbo);
+//		glBindBuffer(GL_ARRAY_BUFFER, normalsVbo);
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * idx, voronoiVertices, GL_STATIC_DRAW);
+
+
+		/* Set the texture of the model */
+		textureData = stbi_load(textureFile, &textureWidth, &textureHeight, &textureComp, STBI_rgb);
+		GLuint texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		/* Set the normal map of the model */
+		normalData = stbi_load(normalFile, &normalWidth, &normalHeight, &normalComp, STBI_rgb);
+		GLuint normal;
+		glGenTextures(1, &normal);
+		glBindTexture(GL_TEXTURE_2D, normal);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, normalWidth, normalHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, normalData);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+
+		glBindBuffer(GL_ARRAY_BUFFER, coordsVbo);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+		glBindBuffer(GL_ARRAY_BUFFER, normalsVbo);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		glEnableVertexAttribArray(2);
+		glEnableVertexAttribArray(3);
 
 		/* Initialize the shader program */
 		shaderProgram = glCreateProgram();
@@ -323,7 +386,20 @@ void initShadersVAOS(){
 		glAttachShader(shaderProgram, fragmentShader);
 		glBindAttribLocation(shaderProgram, 0, "inPoint");
 		glBindAttribLocation(shaderProgram, 1, "inColor");
+		glBindAttribLocation(shaderProgram, 2, "inCoords");
+		glBindAttribLocation(shaderProgram, 3, "inNormal");
 		glLinkProgram(shaderProgram);
+
+		// Send texture
+		/* Set information for the texture locations */
+		glUniform1i(textureDataLocation, 0);
+		glUniform1i(normalDataLocation, 1);
+
+		/* Bind textures */
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normal);
 
 		// MVP Matrices
 		/* Get the location of the uniform variables */
@@ -331,6 +407,8 @@ void initShadersVAOS(){
 		viewMatrixLocation = glGetUniformLocation(shaderProgram, "viewMatrix");
 		projMatrixLocation = glGetUniformLocation(shaderProgram, "projMatrix");
 		perlinLocation = glGetUniformLocation(shaderProgram, "perlinData");
+		textureDataLocation = glGetUniformLocation(shaderProgram, "textureData");
+		normalDataLocation = glGetUniformLocation(shaderProgram, "normalData");
 
 
 //		glMatrixMode(GL_PROJECTION);
@@ -368,7 +446,9 @@ void init(){
 	// Define elevation
 	// * circleVertices arent drawn
 	circlePointCt = terrainInput(elevation, biomesInformation, circleVertices, circleColors, perlinOffsets);
+	perlinArray = convertToArray(perlinOffsets);
 	idx = VoronoiVerticesColors(vd, &voronoiPoints, &voronoiColors);
+
 
 
 
@@ -385,12 +465,26 @@ void init(){
 	// Adjust voronoi points
 	voronoiVertices = adjustVoronoi(&voronoiPoints, &voronoiColors, elevation, circleColors, idx);
 
+	// Find coords
+	voronoiCoords = findCoords(&voronoiPoints, idx);
 
 	// Initialize shaders
 	initShadersVAOS();
 
 }
 
+double * convertToArray(glm::vec3 matrix[windowWidth][windowHeight]){
+	int x, y, i = 0;
+	double * result = (double *) calloc(windowWidth * windowHeight * 3, sizeof(double) );
+	for(x = 0; x < windowWidth; x++){
+		for(y = 0; y < windowHeight; y++){
+			result[i++] = matrix[x][y].x;
+			result[i++ + 1] = matrix[x][y].y;
+			result[i++ + 2] = matrix[x][y].z;
+		}
+	}
+	return result;
+}
 
 void drawAll(int circlePointCt){
 //	glBindVertexArray(circlesVao);
@@ -426,12 +520,9 @@ void display(){
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	/* Set the view matrix */
-	glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(islandX, islandY, islandZ));
+	translation = glm::translate(glm::mat4(1.0f), glm::vec3(islandX, islandY, islandZ));
 	viewMatrix = glm::rotate(translation, angle, glm::vec3(1.0f, 0.0f, 0.0f));
 	viewMatrix = glm::rotate(viewMatrix, rotate, glm::vec3(0.0f, 0.0f, 1.0f));
-//	glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 0.0f, 0.0f));
-//	rotation = glm::rotate(rotation, roty, glm::vec3(0.0f, 1.0f, 0.0f));
-//	viewMatrix = glm::translate(rotation, glm::vec3(islandX, islandY, islandZ));
 
 	/* Set the model matrix */
 	//modelMatrix = glm::scale(glm::mat4(1.0), glm::vec3(1.0));
@@ -444,10 +535,7 @@ void display(){
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, glm::value_ptr(projMatrix));
-	int i = (rand() % (int) (windowWidth * windowHeight * 3));
-	float perlinOff = (float) perlinOffsets[i];
-//	printf("Perlin off: %f", perlinOff);
-	glUniform1f(perlinLocation, (perlinOff));
+
 
 	// Use vertex to draw intensity
 	glUseProgram(shaderProgram);
@@ -472,7 +560,26 @@ void idle()
 	glutPostRedisplay();
 }
 
+void mouse(int button,  int state, int x, int y){
+    GLfloat fX = ((x/windowWidth) - 0.5) * 2;
+    GLfloat fY = ((y/windowHeight) - 0.5) * 2;
 
+    double scalevalue = 4.2;
+    glm::vec4 mousePos = glm::vec4(fX, fY, 1 ,1);
+
+    mousePos = modelMatrix * translation * projMatrix *  mousePos;
+
+    float mouseposx, mouseposy;
+    mouseposx = mousePos.x * scalevalue;
+    mouseposy = -mousePos.y * scalevalue;
+
+    if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+
+    	printf("mouse x: %f mouse y: %f\n", mouseposx, mouseposy);
+
+           }
+
+}
 
 void keyboard(unsigned char k, int x, int y)
 {
@@ -507,7 +614,35 @@ void freeStuffs(){
 //	free(waterColors);
 	free(voronoiPoints);
 	free(voronoiColors);
+	free(voronoiVertices);
+	free(voronoiCoords);
+	free(perlinArray);
 }
+
+void special(int key, int x, int y)
+{
+        if(key == GLUT_KEY_LEFT)
+        {
+
+        }
+
+        if(key == GLUT_KEY_RIGHT)
+        {
+
+        }
+
+        if(key == GLUT_KEY_UP)
+        {
+
+        }
+
+        if(key == GLUT_KEY_DOWN)
+        {
+
+        }
+}
+
+
 
 int main(int argc, char ** argv){
 	/* Initialize the GLUT window */
@@ -534,6 +669,9 @@ int main(int argc, char ** argv){
 	glutDisplayFunc(display);
 	glutIdleFunc(idle);
 	glutKeyboardFunc(keyboard);
+	glutSpecialFunc(special);
+	glutMouseFunc(mouse);
+
 
 	/* Start the main GLUT loop */
 	/* NOTE: No code runs after this */

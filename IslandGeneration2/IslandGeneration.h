@@ -21,6 +21,7 @@ enum Mode {Random=1, Spiral=2, Grid=3};
 // Main
 int inputter(enum Mode *);
 
+#include "glm/vec3.hpp"
 
 // Elevation
 struct terrain{
@@ -49,16 +50,17 @@ enum Biome{
 };
 void findCategory(double elevation, double moisture, int * category);
 //void biomesGeneration(double * colors, double elevation[windowWidth][windowHeight], terrain *, int, Biome biomesInfo[windowWidth][windowHeight]);
-void biomesGeneration(double * colors, double elevation[windowWidth][windowHeight], terrain * waterLocations, int waterCt, Biome biomesInfo[windowWidth][windowHeight]);
+void biomesGeneration(glm::vec3 colors[windowWidth][windowHeight], double elevation[windowWidth][windowHeight], terrain * waterLocations, int waterCt, Biome biomesInfo[windowWidth][windowHeight]);
 
 
 
 #define elevDiffThreshold 0.3
 
-int terrainInput(double elevation[windowWidth][windowHeight], Biome b[windowWidth][windowHeight], double *, double *, double *);
+int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInformation[windowWidth][windowHeight], double * circleVertices, glm::vec3 circleColor[windowWidth][windowHeight], glm::vec3 perlinOffsets[windowWidth][windowHeight]);
 
-
+// Utilities
 double normalize(int, int);
+double * convertToArray(glm::vec3 mat[windowWidth][windowHeight]);
 
 
 // Functions for point generations
@@ -72,7 +74,7 @@ double * LloydRelaxation(double *);
 // Water functions
 
 // Perlin functions
-void generatePerlinNoise(double *);
+void generatePerlinNoise(glm::vec3 perlin[windowWidth][windowHeight], double elevation[windowWidth][windowHeight]);
 
 // includes for defining the Voronoi diagram adaptor
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -102,8 +104,8 @@ typedef VD::Ccb_halfedge_circulator   Ccb_halfedge_circulator;
 
 // Voronoi functions and definitions
 VD generateVoronoi(int **, int);
-double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[windowWidth][windowHeight], double * landColor, int idx);
+double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[windowWidth][windowHeight], glm::vec3 landColor[windowWidth][windowHeight], int idx);
 int VoronoiVerticesColors(VD vd, int ** voronoiPoints, double ** voronoiColors);
-
+double * findCoords(int **, int);
 
 #endif
