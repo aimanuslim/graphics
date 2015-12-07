@@ -17,19 +17,19 @@ public:
 	double getAngle();
 	float getLength();
 	float getWidth();
+	PART_TYPE getType();
 	//For 3-D object orientation
 	tuple3d& getDir();
 	part_model(PART_TYPE);
 	~part_model();
 
-
 protected:
-	//short number;
-	short length;
+	float length;
 	tuple3d basePos;
 	double angle;
 	float width;
 	tuple3d color, dir;
 	PART_TYPE type;
+	//std::vector<char> orient_order;
 };
 

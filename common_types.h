@@ -8,6 +8,9 @@
 using namespace std;
 using namespace glm;
 
+constexpr auto PI = 3.14159265359;
+#define _USE_MATH_DEFINES
+
 typedef struct tuple3d
 {
 	float first;
@@ -27,6 +30,13 @@ typedef struct tuple3d
 	tuple3d()
 	{}
 
+	tuple3d(vec3 pos)
+	{
+		first = pos.x;
+		second = pos.y;
+		third = pos.z;
+	}
+
 	tuple3d operator*(float value)
 	{
 		return tuple3d(first * value, second * value, third * value);
@@ -42,6 +52,15 @@ enum PART_TYPE
 	SEGMENT,
 	LEAF
 };
+
+enum TURTLE_AXIS
+{
+	H,
+	L,
+	U
+};
+
+typedef struct std::pair<tuple3d, tuple3d> pos_orient;
 
 typedef struct vec_lines
 {
@@ -59,6 +78,7 @@ typedef struct vec_lines
 	bool collides(vec_lines line2)
 	{
 		float t = 0, s = 0;
+		float tolerance = 0.05;
 		glm::vec3 num = this->base_point - line2.base_point,
 			denom = glm::cross(this->dir, line2.dir);
 
@@ -69,26 +89,28 @@ typedef struct vec_lines
 		}
 		//printf("dir_line 1 :  (%f, %f, %f)\n dir_line 2 : (%f, %f, %f)\n", this->dir.x, this->dir.y, this->dir.z, line2.dir.x, line2.dir.y, line2.dir.z);
 		//printf("direction cross : %f t : %f s : %f\n", denom.length(), t, s);
-		if (line2.part == LEAF && this->part == BRANCH || part == LEAF && line2.part == BRANCH)
-		{
-			/*printf("Collision detection between leaf and branch : rxs : (%f, %f, %f) (%f) t : %f s : %f\n", denom.x, denom.y, denom.z, vec_mag(denom), t, s);
-			printf("dir 1 : (%f, %f, %f) Base 1 : (%f, %f, %f) \ndir 2 : (%f, %f, %f) Base 2 : (%f, %f, %f)\n", dir.x, dir.y, dir.z, base_point.x, base_point.y, base_point.z, line2.dir.x, line2.dir.y, line2.dir.z, line2.base_point.x, line2.base_point.y, line2.base_point.z);
-			printf("bp1 - bp2 : (%f, %f, %f)\n", num.x, num.y, num.z);*/
-		}	
-		/**/
+		//if ((line2.part == LEAF && this->part == LEAF || part == LEAF && line2.part == LEAF) && /*std::abs(float(base_point.x) - float(line2.base_point.x)) < 1*/  std::abs(float(base_point.y) - float(line2.base_point.y)) < 2)
+		//{
+			//printf("Collision detection : rxs : (%f, %f, %f) (%f) t : %f s : %f\n", denom.x, denom.y, denom.z, vec_mag(denom), t, s);
+			//printf("dir 1 : (%f, %f, %f) Base 1 : (%f, %f, %f) \ndir 2 : (%f, %f, %f) Base 2 : (%f, %f, %f)\n", dir.x, dir.y, dir.z, base_point.x, base_point.y, base_point.z, line2.dir.x, line2.dir.y, line2.dir.z, line2.base_point.x, line2.base_point.y, line2.base_point.z);
+			//printf("bp1 - bp2 : (%f, %f, %f)\n", num.x, num.y, num.z);
+		//}	
 		if (vec_mag(denom) != 0 && t <= 1 && s <= 1)
 		{
-			vec3 intersec_point = base_point + t * dir;
-			float dist_1 = this->Euclidean_dist(intersec_point), dist_2 = line2.Euclidean_dist(intersec_point);
+			vec3 intersec_p1 = base_point + t * dir, intersec_p2 = line2.base_point + s * line2.dir;
+			float dist_1 = this->Euclidean_dist(intersec_p1), dist_2 = line2.Euclidean_dist(intersec_p2);
 			float len_1 = vec_mag(this->dir), len_2 = vec_mag(line2.dir);
-			/*printf("Intersection point : (%f, %f, %f)\n", intersec_point.x, intersec_point.y, intersec_point.z);
-			printf("Intersec point dist :  %f %f\n", len_1, len_2);*/
+			//printf("Intersection point 1 : (%f, %f, %f) Intersection point 2 : (%f, %f, %f)\n", intersec_p1.x, intersec_p1.y, intersec_p1.z, intersec_p2.x, intersec_p2.y, intersec_p2.z);
+			//printf("Intersec point dist : (%f, %f) (%f, %f) \n", dist_1, len_1, dist_2, len_2);
 /*			if(vec_mag(this->dir) > this->Euclidean_dist(intersec_point)
 				&& vec_mag(line2.dir) >= line2.Euclidean_dist(intersec_point))
 				return true;*/
 
-			if (dist_1 <= len_1 && len_2 <= dist_2 && intersec_point != line2.base_point)
+			if (vec_mag(intersec_p1 - intersec_p2) < tolerance && dist_1 <= len_1 && dist_2 <= len_2 && s > tolerance)/*vec_mag(intersec_p1 - line2.base_point) > */
+			{
+				printf("Collides!\n");
 				return true;
+			}
 		}
 		return false;
 	}

@@ -52,6 +52,7 @@ class tree_renderer
 		
 		void clearPartsList();
 		void generateArrays();
+		tuple3d calculateAngles(vec3);
 
 	public:	
 		int simThresh, iterations;

@@ -22,22 +22,24 @@ int main(int argc, char **argv)
 
 	//Test string generator
 	tree_generator generator(parser);
-	tuple3d base_location = tuple3d(0.0, -10.0, -5.0f);
+	tuple3d base_location = tuple3d(0.0, 0.0, -5.0f);
 	
 	/*for (tuple3d base_loc : surface_normals)
 	{
 
 	}*/
-	generator.setTreeBaseLocation(base_location);
+	//generator.setTreeBaseLocation(base_location);
+	generator.setBaseOrientation(base_location, tuple3d(0, 1, 0));
 	//generator.generateTree(parser->model_data->find(std::string("iterations"))->second));
-	_sleep(10000);
+	//_sleep(10000);
 
 	//Instantiate Renderer
 	tree_renderer * rend_obj(new tree_renderer(&generator));
 	generator.setRenderer(rend_obj);
-	//generator.printTree();
-	//generator.traverseGeneratedTree();
-	rend_obj->simThresh = 10000;
+	generator.generateTree(1);
+	generator.printTree();
+	generator.traverseGeneratedTree();
+	rend_obj->simThresh = 999;
 	rend_obj->iterations = parser->iterations;
 	
 	//Defining renderer pointer

@@ -28,8 +28,13 @@
 	Example : F -> FF[F+F[F[L][-L]]+F[++L]][FFF[+L][L][-L]]-F-FF[L][-L]
 	Example 2 (edge-rewriting) : F -> F[+F]F[-F][F]
 
-	Example 3 (node-rewriting) : X -> F[+X][-X]FX
+	Example 3 (node-rewriting) : L -> F[+L][-L]FL (2D)
+							     F -> FF (2D)
+								 F-> [^&+L][+^&L]F[>>L&-L][<&L] {3D)
 
+	Example 4 (3-D tree with inter-plane angle) : F -> GG[-GF][+F]
+		
+	Bush Like Structure with lower branch height - : F[&+-L][^+&L]F[+L][-L][^F]L
 */
 #ifndef GRAMMAR_PARSER
 #define GRAMMAR_PARSER

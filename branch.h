@@ -14,10 +14,11 @@ public:
 	}
 
 	//Default branch Instance Creator
-	static branch * createBranch(double angle, tuple3d pos /*std::pair<float, float> pos2*/,  float length, float width)
+	static branch * createBranch(vec3 direction, tuple3d pos /*std::pair<float, float> pos2*/,  float length, float width)
 	{
 		branch * model = new branch();
-		model->setParameters(length, width, angle);
+		model->setParameters(length, width, 0.0);
+		model->setDirection(direction.x, direction.y, direction.z);
 		model->setPosition(pos.first, pos.second, 0.0);
 		model->setColor(0.54, 0.27, 0.07);
 		return model;

@@ -17,9 +17,19 @@ void part_model::setPosition(float x, float y, float z)
 	this->basePos = tuple3d(x, y, z);
 }
 
+void part_model::setDirection(float x, float y, float z)
+{
+	this->dir = tuple3d(x, y, z);
+}
+
 void part_model::setColor(float r, float g, float b)
 {
 	this->color = tuple3d(r, g, b);
+}
+
+PART_TYPE part_model::getType()
+{
+	return this->type;
 }
 
 tuple3d& part_model::getBasePos()

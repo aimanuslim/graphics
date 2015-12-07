@@ -27,25 +27,32 @@ private:
 	tree_renderer * renderer;
 	std::map<string, TreeNode *> rule_trees;
 	std::string currentTree;
-	tuple3d curr_basePoint;
-	stack<std::pair<char, tuple3d>> * posStack;
+	tuple3d curr_basePoint, base_dir, vertex;
+	vec3 curr_dir;
+	stack<std::pair<char, pos_orient>> * posStack;
+	unsigned int frameCount;
 	/*Map of tree parts to static model*/
 	//std::map<string, Model> modelMap;
 	//TODO Include Parameters
-	float currAngle;
+	float currAngle, currbranch_l, currbranch_w, leaf_l, leaf_w;
 	std::list<vec_lines> tree_vectors;
 	/*
 		Model curr_part;
 		
 	*/
 	void clearStack();
-
+	void popCurrentStackFrame();
+	vec3 generateRotation(TURTLE_AXIS axis, vec3, short);
+	
 public:
+	float contract_l, contract_w;
 	tree_generator(grammar_parser *);
 	void setRenderer(tree_renderer *);
 	void setTreeBaseLocation(tuple3d);
+	void setBaseOrientation(tuple3d, tuple3d);
 	bool checkCollision(vec3, vec3, PART_TYPE);
 	void generateTree(int);
+	void analyzeTree();
 	void printTree();
 	bool traverseGeneratedTree();
 	void calculateProperties();
