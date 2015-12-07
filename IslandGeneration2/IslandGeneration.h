@@ -9,9 +9,11 @@
 
 
 
-/* Window information */
-#define windowWidth 1400
-#define windowHeight 1200
+/* Island information */
+
+#define IslandWidth 1400
+#define IslandHeight 1200
+#define IslandRadius 600
 #define ZPOS 0.8
 
 
@@ -49,18 +51,18 @@ enum Biome{
 	SUBTROPDESERT = 12,
 };
 void findCategory(double elevation, double moisture, int * category);
-//void biomesGeneration(double * colors, double elevation[windowWidth][windowHeight], terrain *, int, Biome biomesInfo[windowWidth][windowHeight]);
-void biomesGeneration(glm::vec3 colors[windowWidth][windowHeight], double elevation[windowWidth][windowHeight], terrain * waterLocations, int waterCt, Biome biomesInfo[windowWidth][windowHeight]);
+//void biomesGeneration(double * colors, double elevation[IslandWidth][IslandHeight], terrain *, int, Biome biomesInfo[IslandWidth][IslandHeight]);
+void biomesGeneration(glm::vec3 colors[IslandWidth][IslandHeight], double elevation[IslandWidth][IslandHeight], terrain * waterLocations, int waterCt, Biome biomesInfo[IslandWidth][IslandHeight]);
 
 
 
 #define elevDiffThreshold 0.3
 
-int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInformation[windowWidth][windowHeight], double * circleVertices, glm::vec3 circleColor[windowWidth][windowHeight], glm::vec3 perlinOffsets[windowWidth][windowHeight]);
+int terrainInput(double elevation[IslandWidth][IslandHeight], Biome biomesInformation[IslandWidth][IslandHeight], double * circleVertices, glm::vec3 circleColor[IslandWidth][IslandHeight], glm::vec3 perlinOffsets[IslandWidth][IslandHeight]);
 
 // Utilities
 double normalize(int, int);
-double * convertToArray(glm::vec3 mat[windowWidth][windowHeight]);
+double * convertToArray(glm::vec3 mat[IslandWidth][IslandHeight]);
 
 
 // Functions for point generations
@@ -74,7 +76,7 @@ double * LloydRelaxation(double *);
 // Water functions
 
 // Perlin functions
-void generatePerlinNoise(glm::vec3 perlin[windowWidth][windowHeight], double elevation[windowWidth][windowHeight]);
+void generatePerlinNoise(glm::vec3 perlin[IslandWidth][IslandHeight], double elevation[IslandWidth][IslandHeight]);
 
 // includes for defining the Voronoi diagram adaptor
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -104,7 +106,7 @@ typedef VD::Ccb_halfedge_circulator   Ccb_halfedge_circulator;
 
 // Voronoi functions and definitions
 VD generateVoronoi(int **, int);
-double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[windowWidth][windowHeight], glm::vec3 landColor[windowWidth][windowHeight], int idx);
+double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[IslandWidth][IslandHeight], glm::vec3 landColor[IslandWidth][IslandHeight], int idx);
 int VoronoiVerticesColors(VD vd, int ** voronoiPoints, double ** voronoiColors);
 double * findCoords(int **, int);
 double * findNormals(double * voronoiVertices, int vmax);

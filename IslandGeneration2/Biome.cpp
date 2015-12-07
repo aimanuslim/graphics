@@ -7,6 +7,16 @@
 
 #include "IslandGeneration.h"
 #include "PerlinNoise.h"
+#include "math.h"
+
+// GLM stuffs
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 
 int biomeColors[biomeMax][3] = {
 		{248,248,248}, // snow
@@ -87,15 +97,14 @@ void findCategory(double elevation, double moisture, int * category){
 }
 
 
-void biomesGeneration(glm::vec3 colors[windowWidth][windowHeight], double elevation[windowWidth][windowHeight], terrain * waterLocations, int waterCt, Biome biomesInfo[windowWidth][windowHeight]){
+void biomesGeneration(glm::vec3 colors[IslandWidth][IslandHeight], double elevation[IslandWidth][IslandHeight], terrain * waterLocations, int waterCt, Biome biomesInfo[IslandWidth][IslandHeight]){
 	int x, y, xidx, waterIdx;
 	double r, g, b;
-	int isWater, isHighest;
 	int maxrad = 1000, rad;
 
 	maxElevation = 0.0;
-	for(y = 0; y < windowHeight; y++){
-			for(x = 0; x < windowWidth; x++){
+	for(y = 0; y < IslandHeight; y++){
+			for(x = 0; x < IslandWidth; x++){
 				if(maxElevation < elevation[x][y]){ maxElevation = elevation[x][y];}
 			}
 	}
@@ -105,14 +114,14 @@ void biomesGeneration(glm::vec3 colors[windowWidth][windowHeight], double elevat
 	PerlinNoise pn;
 	float n;
 	double moisture, distFromCenter;
-	for(y = 0; y < windowHeight; y++){
-		for(x = 0; x < windowWidth; x++){
+	for(y = 0; y < IslandHeight; y++){
+		for(x = 0; x < IslandWidth; x++){
 //			xidx = x / 3;
 			xidx = x;
 
 			moisture = 0;
 			for(waterIdx = 0; waterIdx < waterCt; waterIdx++){
-				n = pn.noise( (double) x / windowWidth, (double) y / windowHeight, 0.0);
+				n = pn.noise( (double) x / IslandWidth, (double) y / IslandHeight, 0.0);
 				rad = maxrad * (n - floor(n));
 				// find moisture
 				distFromCenter = sqrt( (double) pow(waterLocations[waterIdx].x - xidx, 2) + (double) pow(waterLocations[waterIdx].y - y, 2));
@@ -172,32 +181,50 @@ void biomesGeneration(glm::vec3 colors[windowWidth][windowHeight], double elevat
 
 
 			// change colors
-			double m = (double) 1 / 2;
+			glm::vec2 center;
+			glm::vec2 loc;
+			loc.x = x;
+			loc.y = y;
+			center.x = IslandWidth /2;
+			center.y = IslandHeight /2;
+			double distanceFromCtr;
+			distanceFromCtr = (double) glm::length(loc - center);
+			n = pn.noise( (double) x / IslandWidth, (double) y / IslandHeight, 0.0);
+			rad = maxrad * (n - floor(n));
+			//n = sin(x + y);
+			n *= 100;
+
+
 //			if(x % 3 == 0){
-				colors[x][y].r = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : r * 0.8;
-				colors[x][y].g = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : g * 0.8;
-				colors[x][y].b = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? moisture - 0.5 : b * 0.8;
+				colors[x][y].r = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f) ) ? 0.0f : r * 0.8;
+				colors[x][y].g = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f) ) ? 0.0f : g * 0.8;
+				colors[x][y].b = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f) ) ? moisture - 0.5 : b * 0.8;
+				if(distanceFromCtr > (IslandRadius + n)){
+					colors[x][y].r = 0;
+					colors[x][y].g = 0;
+					colors[x][y].b = 0.4;
+				}
 
-//				colors[(x + 0) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : r * 0.8;
+//				colors[(x + 0) + y * IslandWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : r * 0.8;
 
-//				colors[(x + 1) + y * windowWidth * 3] = ((moisture > 0.6) && (elevation[xidx][y] < ((double) 1.0 / pow(10, 6)))) ? 0.0f : g * 0.8;
-//				colors[(x + 1) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : g * 0.8;
+//				colors[(x + 1) + y * IslandWidth * 3] = ((moisture > 0.6) && (elevation[xidx][y] < ((double) 1.0 / pow(10, 6)))) ? 0.0f : g * 0.8;
+//				colors[(x + 1) + y * IslandWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? 0.0f : g * 0.8;
 
 
-//				colors[(x + 2) + y * windowWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? moisture - 0.5 : b * 0.8;
+//				colors[(x + 2) + y * IslandWidth * 3] = ((moisture > 0.8) && (elevation[xidx][y] == 0.00000000000000000000000f)) ? moisture - 0.5 : b * 0.8;
 				if(((elevation[xidx][y] != 0.0000000000000000000f))){
 //					printf("Non zero Elevation: %0.8lf\n", elevation[xidx][y]);
 				}
-//				colors[(x + 2) + y * windowWidth * 3] *= 2;
+//				colors[(x + 2) + y * IslandWidth * 3] *= 2;
 
-//				if(colors[(x + 0) + y * windowWidth * 3] > 1.0){colors[(x + 0) + y * windowWidth * 3] = 1.0;}
-//				if(colors[(x + 1) + y * windowWidth * 3] > 1.0){colors[(x + 1) + y * windowWidth * 3] = 1.0;}
-//				if(colors[(x + 2) + y * windowWidth * 3] > 1.0){colors[(x + 2) + y * windowWidth * 3] = 1.0;}
+//				if(colors[(x + 0) + y * IslandWidth * 3] > 1.0){colors[(x + 0) + y * IslandWidth * 3] = 1.0;}
+//				if(colors[(x + 1) + y * IslandWidth * 3] > 1.0){colors[(x + 1) + y * IslandWidth * 3] = 1.0;}
+//				if(colors[(x + 2) + y * IslandWidth * 3] > 1.0){colors[(x + 2) + y * IslandWidth * 3] = 1.0;}
 
 //				if(thisBiome == SUBTROPDESERT){
-//							colors[(x + 0) + y * windowWidth * 3] = r * 0.9;
-//							colors[(x + 1) + y * windowWidth * 3] = g * 0.9;
-//							colors[(x + 2) + y * windowWidth * 3] = b * 0.9;
+//							colors[(x + 0) + y * IslandWidth * 3] = r * 0.9;
+//							colors[(x + 1) + y * IslandWidth * 3] = g * 0.9;
+//							colors[(x + 2) + y * IslandWidth * 3] = b * 0.9;
 //						}
 //			}
 

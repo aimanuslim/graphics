@@ -11,6 +11,7 @@
 #include <ctime>
 #include <math.h>
 #include "IslandGeneration.h"
+#include "PerlinNoise.h"
 
 // GLM stuffs
 #include "glm/vec2.hpp"
@@ -21,32 +22,53 @@
 #include "glm/gtc/type_ptr.hpp"
 
 
-double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[windowWidth][windowHeight], glm::vec3 landColor[windowWidth][windowHeight], int idx){
+double * adjustVoronoi(int ** voronoiPositions, double ** voronoiColors, double elevation[IslandWidth][IslandHeight], glm::vec3 landColor[IslandWidth][IslandHeight], int idx){
 	int x = 0, y = 0, i = 0;
 	double currHeight;
 	double * resVorPos;
 	*voronoiColors =  (double *) calloc( idx,  sizeof(double) );
 	resVorPos =  (double *) calloc( idx,  sizeof(double) );
 	double maxElev = 0;
+
+	PerlinNoise pn;
+	double n;
+	int maxrad = 1000, rad ;
+	glm::vec2 center;
+	glm::vec2 loc;
+
+	center.x = IslandWidth / 2;
+	center.y = IslandHeight / 2;
+	double distanceFromCtr;
+
+
+
 	while(i < idx){
-//		x = (int) ( ( (double) ((*voronoiPositions)[i] + 1.0f) / 2.0f)     * windowWidth);
-//		y = (int) ( ( (double) ((*voronoiPositions)[i + 1] + 1.0f) / 2.0f) * windowHeight);
+//		x = (int) ( ( (double) ((*voronoiPositions)[i] + 1.0f) / 2.0f)     * IslandWidth);
+//		y = (int) ( ( (double) ((*voronoiPositions)[i + 1] + 1.0f) / 2.0f) * IslandHeight);
 		x = (*voronoiPositions)[i];
 		y = (*voronoiPositions)[i + 1];
-//		x *= 3;
+		loc.x = x;
+		loc.y = y;
+
 
 		if(
-			(x >= 0 && x < windowWidth) &&
-			(y >= 0 && y < windowHeight)
+			(x >= 0 && x < IslandWidth) &&
+			(y >= 0 && y < IslandHeight)
 		){
 
-			resVorPos[i] = normalize(x, windowWidth);
-			resVorPos[i + 1] = normalize(y, windowHeight);
+			distanceFromCtr = (double) glm::length(loc - center);
+			n = pn.noise( (double) x / IslandWidth, (double) y / IslandHeight, 0.0);
+			rad = maxrad * (n - floor(n));
+			//n = sin(x + y);
+			n *= 1800;
+
+			resVorPos[i] = normalize(x, IslandWidth);
+			resVorPos[i + 1] = normalize(y, IslandHeight);
 			//z-value
 			currHeight = elevation[x][y];
 			if(maxElev < currHeight){ maxElev = currHeight ; }
 //			(*voronoiPositions)[i + 2] = -currHeight;
-			resVorPos[i + 2] = -currHeight;
+			resVorPos[i + 2] = (distanceFromCtr < (IslandRadius + n)) ? -currHeight:0.0f;
 //			printf("Voronoi pos: (%d, %d) E: %f\n", x, y, resVorPos[i + 2]);
 
 //			*voronoiColors =  (double *) realloc((*voronoiColors), (i+ 3) *  sizeof(double) );
@@ -125,8 +147,8 @@ double * findCoords(int ** voronoiPoints, int vmax){
 	int vp = vmax / 3;
 	double * Coords = (double *) malloc(vp * 2 * sizeof(double));
 	while(i < (vp * 2)){
-		p0.x = (double) (*voronoiPoints)[i] / windowWidth;
-		p0.y = (double) (*voronoiPoints)[i + 1] / windowHeight;
+		p0.x = (double) (*voronoiPoints)[i] / IslandWidth;
+		p0.y = (double) (*voronoiPoints)[i + 1] / IslandHeight;
 		Coords[i++] = p0.x;
 		Coords[i++] = p0.y;
 	}
@@ -166,7 +188,7 @@ int VoronoiVerticesColors(VD vd, int ** voronoiPoints, double ** voronoiColors){
 	//					delaunayColors[didx++] = 0.0f; //(double) ((rand() % (int) 255) + 1) / 255.0f;//0.0f;
 					if(
 //							(currX > -1 && currX < 1) && (currY > -1) && (currY < 1)
-							(currX >= 0 && currX <= windowWidth) && (currY >= 0) && (currY <= windowHeight)
+							(currX >= 0 && currX <= IslandWidth) && (currY >= 0) && (currY <= IslandHeight)
 //							(et->source()->point().x() > -1) && (et->source()->point().x() < 1) &&
 //							(et->source()->point().y() > -1) && (et->source()->point().y() < 1)
 
@@ -176,7 +198,7 @@ int VoronoiVerticesColors(VD vd, int ** voronoiPoints, double ** voronoiColors){
 							double tx = et->target()->point().x();
 							double ty = et->target()->point().y();
 
-							if(!(sx < 0 || sx > windowWidth || sy < 0 || sy > windowHeight || tx < 0 || tx > windowWidth || ty < 0 || ty > windowHeight)){
+							if(!(sx < 0 || sx > IslandWidth || sy < 0 || sy > IslandHeight || tx < 0 || tx > IslandWidth || ty < 0 || ty > IslandHeight)){
 							// reallocate memory
 							(*voronoiPoints) = (int *) realloc((*voronoiPoints), (idx + 9) * sizeof(int));
 

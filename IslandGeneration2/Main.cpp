@@ -83,20 +83,20 @@ int normalHeight;
 int normalComp;
 
 // Water
-//double waterVertices[windowWidth * windowHeight * 3] = {0};
-//double waterColors [windowWidth * windowHeight * 3] = {0};
+//double waterVertices[IslandWidth * IslandHeight * 3] = {0};
+//double waterColors [IslandWidth * IslandHeight * 3] = {0};
 double * waterVertices = NULL;
 double * waterColors = NULL;
 int waterPtCt;
 double thres = 0.0005;
 
 // Circle
-double circleVertices[windowWidth * windowHeight * 3];
-//double circleColors[windowWidth * windowHeight * 3];
-glm::vec3 circleColors[windowWidth][windowHeight];
+double circleVertices[IslandWidth * IslandHeight * 3];
+//double circleColors[IslandWidth * IslandHeight * 3];
+glm::vec3 circleColors[IslandWidth][IslandHeight];
 int circlePointCt;
-double elevation[windowWidth][windowHeight] = {0};
-Biome biomesInformation[windowWidth][windowHeight];
+double elevation[IslandWidth][IslandHeight] = {0};
+Biome biomesInformation[IslandWidth][IslandHeight];
 
 // Points
 int * setPoints;
@@ -105,8 +105,8 @@ double setPointsColors[1000 * 3];
 Mode pointMode = Random; // Mode for points scattering
 
 // Noise
-glm::vec3 perlinOffsets[windowWidth][windowHeight];
-double *perlinArray;//[windowWidth * windowHeight * 3];
+glm::vec3 perlinOffsets[IslandWidth][IslandHeight];
+double *perlinArray;//[IslandWidth * IslandHeight * 3];
 
 // ************************* Island Location *************************** //
 double islandX = 0;
@@ -126,7 +126,7 @@ float resultx, resulty, resultz, movebackx, movebacky, movebackz;
 
 /* Field of view, aspect and near/far planes for the perspective projection */
 float fovy = 45.0;
-float aspect = windowWidth / windowHeight;
+float aspect = IslandWidth / IslandHeight;
 float zNear = 1.0;
 float zFar = 100.0;
 int orthomod = 0;
@@ -134,15 +134,15 @@ float dist = 0;
 
 
 // Voronoi
-//double voronoiPoints[windowWidth * windowHeight * 3] = {0};
-//double voronoiColors[windowWidth * windowHeight * 3] = {0};
+//double voronoiPoints[IslandWidth * IslandHeight * 3] = {0};
+//double voronoiColors[IslandWidth * IslandHeight * 3] = {0};
 int *voronoiPoints;
 double *voronoiColors;
 double * voronoiVertices;
 double * voronoiCoords;
 double * voronoiNormals;
-double delaunayPoints[windowWidth * windowHeight * 3 * 3];
-double delaunayColors[windowWidth * windowHeight * 3 * 3];
+double delaunayPoints[IslandWidth * IslandHeight * 3 * 3];
+double delaunayColors[IslandWidth * IslandHeight * 3 * 3];
 int idx = 0; // idx for putting in points for voronoiPoints
 int didx = 0; // index for drawing delaunay points
 
@@ -151,7 +151,7 @@ VD vd;
 
 
 // Elevation 2D Array
-//terrain terrainInfo[windowHeight * windowWidth];
+//terrain terrainInfo[IslandHeight * IslandWidth];
 
 /* The transformation matrices */
 glm::mat4 modelMatrix;
@@ -236,7 +236,7 @@ void initShadersVAOS(){
 
 //		glGenBuffers(1, &perlinVbo);
 //		glBindBuffer(GL_ARRAY_BUFFER, perlinVbo);
-//		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * 3 * windowWidth * windowHeight, perlinArray, GL_STATIC_DRAW);
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(double) * 3 * IslandWidth * IslandHeight, perlinArray, GL_STATIC_DRAW);
 //
 //		/* Initialize the Vertex Buffer Object for the colors of the vertices */
 //		glGenBuffers(1, &perlinColorsVbo);
@@ -414,7 +414,7 @@ void initShadersVAOS(){
 
 //		glMatrixMode(GL_PROJECTION);
 //		glLoadIdentity();
-//		gluOrtho2D(0.0, windowWidth, windowHeight, 0.0);
+//		gluOrtho2D(0.0, IslandWidth, IslandHeight, 0.0);
 
 }
 
@@ -424,7 +424,7 @@ void init(){
 
 //    glMatrixMode(GL_PROJECTION);
 //	glLoadIdentity();
-//	gluOrtho2D(0.0, windowWidth, windowHeight, 0.0);
+//	gluOrtho2D(0.0, IslandWidth, IslandHeight, 0.0);
 
 	// Call random point generator
 	// numberofPoints = inputter(&pointMode);
@@ -477,11 +477,11 @@ void init(){
 
 }
 
-double * convertToArray(glm::vec3 matrix[windowWidth][windowHeight]){
+double * convertToArray(glm::vec3 matrix[IslandWidth][IslandHeight]){
 	int x, y, i = 0;
-	double * result = (double *) calloc(windowWidth * windowHeight * 3, sizeof(double) );
-	for(x = 0; x < windowWidth; x++){
-		for(y = 0; y < windowHeight; y++){
+	double * result = (double *) calloc(IslandWidth * IslandHeight * 3, sizeof(double) );
+	for(x = 0; x < IslandWidth; x++){
+		for(y = 0; y < IslandHeight; y++){
 			result[i++] = matrix[x][y].x;
 			result[i++ + 1] = matrix[x][y].y;
 			result[i++ + 2] = matrix[x][y].z;
@@ -532,8 +532,8 @@ void display(){
 	//modelMatrix = glm::scale(glm::mat4(1.0), glm::vec3(1.0));
 
 	/* Set the projection matrix */
-//	projMatrix = glm::perspective(glm::radians(45.0f), ( (float) windowWidth / windowHeight), 0.1f, 100.0f);
-	projMatrix = glm::perspective(glm::radians(45.0f), ( (float) windowWidth / windowHeight), 0.1f, 100.0f);
+//	projMatrix = glm::perspective(glm::radians(45.0f), ( (float) IslandWidth / IslandHeight), 0.1f, 100.0f);
+	projMatrix = glm::perspective(glm::radians(45.0f), ( (float) IslandWidth / IslandHeight), 0.1f, 100.0f);
 
 	/* Send matrix to shader */
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -565,8 +565,8 @@ void idle()
 }
 
 void mouse(int button,  int state, int x, int y){
-    GLfloat fX = ((x/windowWidth) - 0.5) * 2;
-    GLfloat fY = ((y/windowHeight) - 0.5) * 2;
+    GLfloat fX = ((x/IslandWidth) - 0.5) * 2;
+    GLfloat fY = ((y/IslandHeight) - 0.5) * 2;
 
     double scalevalue = 4.2;
     glm::vec4 mousePos = glm::vec4(fX, fY, 1 ,1);
@@ -651,7 +651,7 @@ void special(int key, int x, int y)
 int main(int argc, char ** argv){
 	/* Initialize the GLUT window */
 	glutInit(&argc, argv);
-	glutInitWindowSize(windowWidth, windowHeight);
+	glutInitWindowSize(IslandWidth, IslandHeight);
 	glutInitWindowPosition(500, 500);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutCreateWindow("Points");

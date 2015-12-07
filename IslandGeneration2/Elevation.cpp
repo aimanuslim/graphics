@@ -12,22 +12,31 @@
 #include "PerlinNoise.h"
 #include "IslandGeneration.h"
 
+
+// GLM stuffs
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 int verticesCt = 0;
-//double elevation[windowWidth][windowHeight] = {0};
-//<vector<vector<double>> elevation(windowWidth, windowHeight);
-double waterIntensity[windowWidth][windowHeight] = {0};
+//double elevation[IslandWidth][IslandHeight] = {0};
+//<vector<vector<double>> elevation(IslandWidth, IslandHeight);
+double waterIntensity[IslandWidth][IslandHeight] = {0};
 
 int vIdx = 0, colorIdx;
 
-//void generatePerlinNoise(double elevation[][windowHeight], double waterValues[][windowHeight]){
+//void generatePerlinNoise(double elevation[][IslandHeight], double waterValues[][IslandHeight]){
 //
 //	PerlinNoise pn;
 //	int x,y;
 //	double n, i, j;
-//	for(x = 0; x < windowWidth; x++){
-//		for(y = 0; y < windowHeight; y++){
-//			i = (double) x / windowWidth;
-//			j = (double) y / windowHeight;
+//	for(x = 0; x < IslandWidth; x++){
+//		for(y = 0; y < IslandHeight; y++){
+//			i = (double) x / IslandWidth;
+//			j = (double) y / IslandHeight;
 //			n = 20 * pn.noise((double) i, (double) j, 0.0);
 //			n = n - floor(n);
 //			if(waterValues[x][y] == 0){
@@ -37,32 +46,32 @@ int vIdx = 0, colorIdx;
 //	}
 //}
 
-int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInformation[windowWidth][windowHeight], double * circleVertices, glm::vec3 circleColor[windowWidth][windowHeight], glm::vec3 perlinOffsets[windowWidth][windowHeight]){
+int terrainInput(double elevation[IslandWidth][IslandHeight], Biome biomesInformation[IslandWidth][IslandHeight], double * circleVertices, glm::vec3 circleColor[IslandWidth][IslandHeight], glm::vec3 perlinOffsets[IslandWidth][IslandHeight]){
 
 	int waterIdx;
 	int waterLocCount = 10;
 	terrain  waterLocations[waterLocCount];
 	for(waterIdx = 0; waterIdx < waterLocCount; waterIdx++){
-		waterLocations[waterIdx].x = (rand() % (int) windowWidth) + 1;
+		waterLocations[waterIdx].x = (rand() % (int) IslandWidth) + 1;
 //		waterLocations[waterIdx].x = 700;
-		waterLocations[waterIdx].y = (rand() % (int) windowHeight) + 1;
+		waterLocations[waterIdx].y = (rand() % (int) IslandHeight) + 1;
 //		waterLocations[waterIdx].y = 600;
 
 		//printf("Water location %d -> x: %d y: %d\n", waterIdx, waterLocations[waterIdx].x, waterLocations[waterIdx].y);
 		waterLocations[waterIdx].waterValue = 1.0f;
 	}
 
-	int circlesCt = 15;
+	int circlesCt = 110;
 	int circleIdx;
 	//terrain allIntensity[circlesCt] = {intensity1, intensity2, intensity3, intensity4, intensity5, intensity6};
 	terrain allIntensity[circlesCt];
 	int heightRand;
 	int maxHeight = 500;
 	for(circleIdx = 0; circleIdx < circlesCt; circleIdx++){
-		allIntensity[circleIdx].x = (rand() % (int) windowWidth) + 1;
-		allIntensity[circleIdx].y = (rand() % (int) windowHeight) + 1;;
+		allIntensity[circleIdx].x = (rand() % (int) IslandWidth) + 1;
+		allIntensity[circleIdx].y = (rand() % (int) IslandHeight) + 1;;
 		heightRand = (rand() % maxHeight);
-		allIntensity[circleIdx].intensity = 0.4f;
+		allIntensity[circleIdx].intensity = 0.5f;
 //		allIntensity[circleIdx].intensity = ((double) heightRand / maxHeight) * 0.4f;
 	}
 
@@ -70,13 +79,23 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 	double theta = 0;
 	int vi = 0, coli = 0, i;
 	rmax = 400; // for circles
-	r = 200;
+	r = 100;
 
 	int x,y;
 	i = 0;
+	glm::vec2 center;
+	glm::vec2 loc;
+	center.x = IslandWidth /2;
+	center.y = IslandHeight /2;
+	double dIslandCtr;
+
 	double distFromCenter;
-	for(x = 0; x < windowWidth; x++){
-		for(y = 0; y < windowHeight; y++){
+	for(x = 0; x < IslandWidth; x++){
+		for(y = 0; y < IslandHeight; y++){
+			loc.x = x;
+			loc.y = y;
+			dIslandCtr = glm::length(loc -center);
+			dIslandCtr /= glm::length(center);
 			for(i = 0; i < circlesCt; i++){
 //				r = (double) (rand() % (int) (rmax / 2)) + (rmax / 2);
 				distFromCenter = sqrt( (double) pow(allIntensity[i].x - x, 2) + (double) pow(allIntensity[i].y - y, 2));
@@ -93,7 +112,7 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 						myPow = 0.5;
 					}
 
-					elevation[x][y] +=  allIntensity[i].intensity * pow(1.0 - distFromCenter, myPow);
+					elevation[x][y] +=  allIntensity[i].intensity * pow(1.0 - distFromCenter, myPow) * pow(1.0 - dIslandCtr, 2);
 				}
 				else {
 					elevation[x][y] +=  0.0f;
@@ -106,8 +125,8 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 	}
 
 //	r = 100; // for water
-//	for(x = 0; x < windowWidth; x++){
-//			for(y = 0; y < windowHeight; y++){
+//	for(x = 0; x < IslandWidth; x++){
+//			for(y = 0; y < IslandHeight; y++){
 //				for(i = 0; i < waterLocCount; i++){
 //					distFromCenter = sqrt( (double) pow(waterLocations[i].x - x, 2) + (double) pow(waterLocations[i].y - y, 2));
 //					distFromCenter = ((distFromCenter / r) > 1) ? 1.0f : (distFromCenter / r);
@@ -131,25 +150,25 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 //	i = 0;
 //	int j = 0;
 //	int xtemp, ytemp;
-//	while(j < windowHeight){
-//		while(i < windowWidth * 3){
+//	while(j < IslandHeight){
+//		while(i < IslandWidth * 3){
 //			xtemp = i / 3;
-//			circleVertices[i + j * windowWidth * 3] = normalize(xtemp, windowWidth);
-////			circleColor[i + j * windowWidth * 3] = 1.0f - elevation[xtemp][j];
-////			circleColor[i + j * windowWidth * 3] = (waterIntensity[xtemp][j] > 0) ? 0.0f : 1.0f - elevation[xtemp][j];
-//			circleColor[i + j * windowWidth * 3] = 0.0f;
+//			circleVertices[i + j * IslandWidth * 3] = normalize(xtemp, IslandWidth);
+////			circleColor[i + j * IslandWidth * 3] = 1.0f - elevation[xtemp][j];
+////			circleColor[i + j * IslandWidth * 3] = (waterIntensity[xtemp][j] > 0) ? 0.0f : 1.0f - elevation[xtemp][j];
+//			circleColor[i + j * IslandWidth * 3] = 0.0f;
 //
-//			circleVertices[(i + 1) + j * windowWidth * 3] = normalize(j, windowHeight);
-//			circleColor[(i + 1) + j * windowWidth * 3] = 1.0f - elevation[xtemp][j];
-////			circleColor[(i + 1) + j * windowWidth * 3] = (waterIntensity[xtemp][j] > 0) ? 0.0f : 1.0f - elevation[xtemp][j];
+//			circleVertices[(i + 1) + j * IslandWidth * 3] = normalize(j, IslandHeight);
+//			circleColor[(i + 1) + j * IslandWidth * 3] = 1.0f - elevation[xtemp][j];
+////			circleColor[(i + 1) + j * IslandWidth * 3] = (waterIntensity[xtemp][j] > 0) ? 0.0f : 1.0f - elevation[xtemp][j];
 //
-////			circleVertices[(i + 2) + j * windowWidth * 3] = 0.0f;
-////			circleVertices[(i + 2) + j * windowWidth * 3] = ZPOS + 0.2;;
-//			circleVertices[(i + 2) + j * windowWidth * 3] = ZPOS - elevation[xtemp][j] - 0.7;
+////			circleVertices[(i + 2) + j * IslandWidth * 3] = 0.0f;
+////			circleVertices[(i + 2) + j * IslandWidth * 3] = ZPOS + 0.2;;
+//			circleVertices[(i + 2) + j * IslandWidth * 3] = ZPOS - elevation[xtemp][j] - 0.7;
 //
-////			circleColor[(i + 2) + j * windowWidth * 3] = (waterIntensity[xtemp][j] > 0) ? waterIntensity[xtemp][j]: 1.0f - elevation[xtemp][j]; // BLUE value
-////			circleColor[(i + 2) + j * windowWidth * 3] = 1.0f - elevation[xtemp][j];
-//			circleColor[(i + 2) + j * windowWidth * 3] = 0.0f;
+////			circleColor[(i + 2) + j * IslandWidth * 3] = (waterIntensity[xtemp][j] > 0) ? waterIntensity[xtemp][j]: 1.0f - elevation[xtemp][j]; // BLUE value
+////			circleColor[(i + 2) + j * IslandWidth * 3] = 1.0f - elevation[xtemp][j];
+//			circleColor[(i + 2) + j * IslandWidth * 3] = 0.0f;
 //
 //
 //			i += 3;
@@ -163,7 +182,7 @@ int terrainInput(double elevation[windowWidth][windowHeight], Biome biomesInform
 
 	biomesGeneration(circleColor, elevation, waterLocations, waterLocCount, biomesInformation);
 
-	return windowWidth * windowHeight;
+	return IslandWidth * IslandHeight;
 
 }
 
