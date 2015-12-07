@@ -11,6 +11,9 @@ default: $(TARGET)
 
 all: default
 
+debug: $(TARGET)
+	gdb $(TARGET)
+
 fast: $(TARGETFAST)
 
 run: $(TARGET)
@@ -19,7 +22,8 @@ run: $(TARGET)
 runfast: $(TARGETFAST)
 	./$(TARGETFAST)
 
-OBJECTS = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
+OBJECTS = $(patsubst %.cpp, %.o, $(wildcard *.cpp)) 
+SOURCE = $(wildcard *.cpp)
 HEADERS = $(wildcard *.h)
 
 #Perlin.o: Perlin.cpp PerlinNoise.h
@@ -28,10 +32,12 @@ HEADERS = $(wildcard *.h)
 %.o: %.cpp $(HEADERS)
 	$(CC) $(FLAGS) -c $< $(LIBS) -o $@
 
+
+
 .PRECIOUS: $(TARGET) $(TARGETFAST) $(OBJECTS)
 
 $(TARGETFAST): $(OBJECTS)
-	$(CC) $(FFAST) $(OBJECTS) -Wall $(LIBS) -o $@
+	$(CC) $(FFAST) -c $(OBJECTS) -Wall $(LIBS) -o $@
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(FLAGS) $(OBJECTS) -Wall $(LIBS) -o $@
