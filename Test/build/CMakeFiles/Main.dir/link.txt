@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -g    CMakeFiles/Main.dir/Main.cpp.o  -o Main  -L/usr/local/lib -rdynamic -lmpfr -lgmp /usr/local/lib/libCGAL_Core.so.11.0.1 /usr/local/lib/libCGAL.so.11.0.1 -lboost_thread -lboost_system -lpthread /usr/local/lib/libCGAL_Core.so.11.0.1 /usr/local/lib/libCGAL.so.11.0.1 -lboost_thread -lboost_system -lpthread -Wl,-rpath,/usr/local/lib 
